@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "outDir": "build/compiled",
+    "rootDir": "src",
+    "removeComments": true,
+    "lib": [
+      "esnext"
+    ],
+    "module": "es6",
+    "target": "es5",
+    "moduleResolution": "node",
+    "strict": false,
+    "pretty": false,
+    "declaration": false,
+    "noImplicitAny": true
+    // "typeRoots" : ["./node_modules/@types", "./src/@types"]
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

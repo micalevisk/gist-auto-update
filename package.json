@@ -1,0 +1,35 @@
+{
+  "name": "update-gist",
+  "version": "1.0.0",
+  "description": "Atualiza (a cada 1 hora) o gist que tem as tasks de projetos do meu Todoist.",
+  "main": "build/update-gist.js",
+  "scripts": {
+    "testlocal": "ts-node .",
+    "build:roll": "rollup -c",
+    "watch:roll": "rollup -cw",
+    "build": "tsc -p .",
+    "watch": "tsc --watch",
+    "wt:serve": "wt serve ./build/update-gist.js --secrets-file ./.env --hostname localhost --port 1234",
+    "wt:cronjob": "wt cron create --schedule \"0 * * * *\" --bundle-minify ./build/update-gist.js --secrets-file ./.env --name update-gist"
+  },
+  "keywords": [
+    "typescript",
+    "webtask",
+    "cronjob"
+  ],
+  "author": "Micael Levi <mllc@icomp.ufam.edu.br> (micalevisk.github.io)",
+  "license": "MIT",
+  "dependencies": {
+    "gists": "^2.0.0",
+    "node-fetch": "^2.2.0",
+    "promise": "^8.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.1",
+    "@types/node-fetch": "^2.1.2",
+    "rollup": "^0.67.0",
+    "rollup-plugin-typescript2": "^0.17.2",
+    "rollup-plugin-uglify-es": "0.0.1",
+    "typescript": "^3.1.6"
+  }
+}
