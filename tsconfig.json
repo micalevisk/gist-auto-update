@@ -12,6 +12,7 @@
     "strict": false,
     "pretty": false,
     "declaration": false,
+    "noUnusedParameters": true,
     "noImplicitAny": true
     // "typeRoots" : ["./node_modules/@types", "./src/@types"]
   },
