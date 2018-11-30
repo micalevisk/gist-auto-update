@@ -21,7 +21,7 @@ export default function attachGist(credentials : Credentials, gistId : string) {
   function getFilenames() : Promise<string[]> {
     if (!gistId) throw new Error(`GIST ID (${gistId}) INVÁLIDO`)
 
-    return gists.get(gistId).then(res => Object.keys(res.body.files)).catch(err => [])
+    return gists.get(gistId).then(res => Object.keys(res.body.files)).catch(() => [])
   }
 
   return {
