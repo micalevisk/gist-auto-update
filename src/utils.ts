@@ -19,4 +19,4 @@ export function updatedFilesToFilesObj(updatedFiles : UpdateFile[]) : { [key: st
 }
 
 
-export const markAsPending = (str : string) => `**${str}**`
+export const markAsPending = (str : string) : string => `**${str}**`
