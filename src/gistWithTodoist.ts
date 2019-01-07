@@ -9,10 +9,11 @@ const EMOJIS = Object.create(null, {
     }
   },
 
-  'book'  : { value: '📖' },
-  'read'  : { value: '🧐' },
-  'learn' : { value: '🧠' },
-  'vide'  : { value: '👀' },
+  'book'    : { value: '📖' },
+  'read'    : { value: '🧐' },
+  'learn'   : { value: '🧠' },
+  'vide'    : { value: '👀' },
+  'playlist': { value: '💾' },
 });
 
 
