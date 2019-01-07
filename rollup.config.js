@@ -1,5 +1,5 @@
 import typescript from 'rollup-plugin-typescript2'
-import uglify from 'rollup-plugin-uglify-es'
+//import uglify from 'rollup-plugin-uglify-es'
 
 import pkg from './package.json'
 
@@ -21,6 +21,6 @@ export default {
       typescript: require('typescript'),
       clean: true
     }),
-    uglify()
+    //uglify()
   ],
 }
