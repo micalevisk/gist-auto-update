@@ -4,8 +4,8 @@ import fetch from 'node-fetch'
 
 const EMOJIS = Object.create(null, {
   'get': {
-    value(label : string) {
-      return (label && this[label.toLowerCase()]) || '';
+    value(label : string) : string {
+      return (label && this[ label.toLowerCase() ]) || '';
     }
   },
 
