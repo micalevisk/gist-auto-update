@@ -20,3 +20,5 @@ export function updatedFilesToFilesObj(updatedFiles : UpdateFile[]) : { [key: st
 
 
 export const markAsPending = (str : string) : string => `**${str}**`
+
+export const removeYouTubeKeyword = (str : string) : string => str.replace(/ - YouTube$/, '')
