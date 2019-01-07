@@ -1,5 +1,5 @@
 import GistAPI from './gistAPI'
-import { jsonToMarkdownTable, markAsPending } from './utils'
+import { jsonToMarkdownTable, markAsPending, removeYouTubeKeyword } from './utils'
 import fetch from 'node-fetch'
 
 const EMOJIS = Object.create(null, {
@@ -54,7 +54,7 @@ function updateGist(credentials : Credentials, gistId : string) {
     const conteudo = tasks.map(({ checked, content }, index) => {
       const row = {
         '#': `${index + 1}`,
-        'name': `[${content.text}](${content.link})`,
+        'name': `[${ removeYouTubeKeyword(content.text) }](${content.link})`,
         'tag': EMOJIS.get(content.tag),
       }
 
