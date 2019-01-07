@@ -49,7 +49,7 @@ function updateGist(credentials : Credentials, gistId : string) {
 
   function createTaskRow(name : string, tasks : Task[]) : UpdateFile {
 
-    let tasksPending = 0
+    let qtdTasksPending = 0
 
     const conteudo = tasks.map(({ checked, content }, index) => {
       const row = {
@@ -61,19 +61,19 @@ function updateGist(credentials : Credentials, gistId : string) {
       if (!checked) { // tarefa pendente
         row['#'] = markAsPending(row['#'])
         row['name'] = markAsPending(row['name'])
-        tasksPending++ // bad way
+        qtdTasksPending++ // bad way
       }
 
       return row
     })
 
     const qtdTasks = conteudo.length
-    const qtdTasksFeitas = qtdTasks - tasksPending
+    const qtdTasksDone = qtdTasks - qtdTasksPending
 
     return {
       filename: `${name}_${qtdTasks}.md`,
       newFilename: `${name}_${qtdTasks}.md`,
-      newContent: `# ${name} (${qtdTasksFeitas}/${qtdTasks}) \n\n${jsonToMarkdownTable(colunas, conteudo)}`
+      newContent: `# ${name} (${qtdTasksDone}/${qtdTasks}) \n\n${jsonToMarkdownTable(colunas, conteudo)}`
     }
 
   }
