@@ -19,7 +19,7 @@ const EMOJIS = Object.create(null, {
 
 const API_URL = 'https://wt-89c6c15cc2042eb4fe4b1fb85909cac3-0.sandbox.auth0-extend.com/todoist-access'
 
-const projectNames = ['Artigos', 'YouTube', 'GitHub']
+const projectNames = ['Artigos', 'YouTube', 'GitHub', 'Livros']
 
 const colunas = {
   separators: [':-:', ':-:', ':-'],
