@@ -30,7 +30,7 @@ const colunas = {
   ]
 }
 
-function updateGist(credentials : Credentials, gistId : string) {
+function updateGist(credentials : Credentials, gistId : string) : Promise<string[]> {
 
   const gist = GistAPI(credentials, gistId)
 
