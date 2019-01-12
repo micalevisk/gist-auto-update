@@ -2,19 +2,20 @@ import GistAPI from './gistAPI'
 import { jsonToMarkdownTable, markAsPending, removeYouTubeKeyword } from './utils'
 import fetch from 'node-fetch'
 
-const EMOJIS = Object.create(null, {
+const EMOJIS = Object.create({
+  'book'    : '📖',
+  'read'    : '🧐',
+  'learn'   : '🧠',
+  'vide'    : '👀',
+  'playlist': '💾',
+}, {
   'get': {
-    value(label : string) : string {
-      return (label && this[ label.toLowerCase() ]) || '';
-    }
-  },
+    value(label? : string) : string {
+      return (label && this[ label.toLowerCase() ]) || ''
+    },
+  }
+})
 
-  'book'    : { value: '📖' },
-  'read'    : { value: '🧐' },
-  'learn'   : { value: '🧠' },
-  'vide'    : { value: '👀' },
-  'playlist': { value: '💾' },
-});
 
 
 const API_URL = 'https://wt-89c6c15cc2042eb4fe4b1fb85909cac3-0.sandbox.auth0-extend.com/todoist-access'
