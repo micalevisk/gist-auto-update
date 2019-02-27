@@ -10,6 +10,7 @@
     "build": "tsc -p .",
     "watch": "tsc --watch",
     "wt:serve": "wt serve ./build/update-gist.js --secrets-file ./.env --hostname localhost --port 1234",
+    "wt:create": "wt create --bundle-minify ./build/update-gist.js --secrets-file ./.env --name update-gist",
     "wt:cronjob": "wt cron create --schedule \"0 * * * *\" --bundle-minify ./build/update-gist.js --secrets-file ./.env --name update-gist"
   },
   "keywords": [
