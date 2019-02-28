@@ -1,8 +1,8 @@
 {
   "name": "update-gist",
   "version": "1.0.0",
-  "main": "build/update-gist.js",
   "description": "Atualizar o gist que tem as tasks de projetos do meu Todoist.",
+  "main": "build/index.js",
   "scripts": {
     "testlocal": "ts-node .",
     "build:roll": "rollup -c",
