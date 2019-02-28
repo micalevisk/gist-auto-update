@@ -6,8 +6,8 @@
     "lib": [
       "esnext"
     ],
-    "module": "es6",
-    "target": "es5",
+    "module": "esnext", // 'CommonJS' is incompatible with Rollup
+    "target": "es6",
     "moduleResolution": "node",
     "strict": true,
     "pretty": false,
