@@ -39,7 +39,7 @@ function updateGist(credentials : Credentials, gistId : string) : Promise<string
     const filenames = await gist.getFilenames()
 
     return gist.edit({
-      newDescription: `Todoist.com - my tasks (last update: ${new Date().toLocaleTimeString('pt-BR', {timeZone: 'America/Manaus'})} [America/Manaus])`,
+      newDescription: `My reading list (last update: ${new Date().toLocaleTimeString('pt-BR', {timeZone: 'America/Manaus'})} [America/Manaus])`,
       updatedFiles: [
         ...filenames.map(filename => ({ filename, newContent: null })), // apagar todos os arquivos correntes
         ...updatedFiles
