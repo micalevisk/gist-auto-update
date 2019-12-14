@@ -37,9 +37,10 @@ function updateGist(credentials : Credentials, gistId : string) : Promise<string
 
   async function editarGist(updatedFiles : UpdateFile[]) : Promise<Files> {
     const filenames = await gist.getFilenames()
+    const updatedAtDate = (new Date()).toLocaleString('pt-BR', {timeZone: 'America/Manaus'})
 
     return gist.edit({
-      newDescription: `My reading list (last update: ${new Date().toLocaleTimeString('pt-BR', {timeZone: 'America/Manaus'})} [America/Manaus])`,
+      newDescription: `Reading List (updated at: ${updatedAtDate} [America/Manaus])`,
       updatedFiles: [
         ...filenames.map(filename => ({ filename, newContent: null })), // apagar todos os arquivos correntes
         ...updatedFiles
