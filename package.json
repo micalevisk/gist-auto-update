@@ -17,10 +17,10 @@
   "dependencies": {
     "@octokit/rest": "^16.35.2",
     "dotenv-safe": "^8.2.0",
-    "node-fetch": "^2.2.0"
+    "node-fetch": "^2.2.0",
+    "sucrase": "^3.10.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.2",
-    "sucrase": "^3.10.1"
+    "nodemon": "^2.0.2"
   }
 }
