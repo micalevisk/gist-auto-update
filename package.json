@@ -6,7 +6,8 @@
   "scripts": {
     "prestart": "sucrase ./src -d ./build --transforms imports",
     "start": "node build/",
-    "dev": "nodemon --config nodemon.json"
+    "dev": "nodemon --config nodemon.json",
+    "clean": "rm -rf build/"
   },
   "author": "Micael Levi (micalevisk.github.io)",
   "license": "MIT",

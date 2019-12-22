@@ -17,5 +17,5 @@ RUN npm ci
 # Copy the rest of your action's code
 COPY . .
 
-# Run `node index.js`
-ENTRYPOINT ["npm", "start"]
+# Run `npm start`
+CMD [ "npm", "start" ]

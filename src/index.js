@@ -8,7 +8,7 @@ require('dotenv-safe').config({
 });
 
 import Octokit from '@octokit/rest';
-import projectNames from './projectNames.json';
+import projectNames from '../projectNames.json';
 import getProjects from './projects';
 import * as _ from './utils';
 
