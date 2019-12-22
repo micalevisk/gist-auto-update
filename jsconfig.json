@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "target": "es2017",
+    "module": "commonjs",
+    "lib": ["es2017.object"],
+    "checkJs": true,
+    "alwaysStrict": true,
+    "watch": false
+  },
+  "exclude": ["node_modules"],
+  "include": ["./src/**/*"]
+}

@@ -1,38 +1,26 @@
 {
-  "name": "update-gist",
-  "version": "1.0.0",
+  "name": "gist-auto-update",
+  "version": "2.0.0",
   "description": "Atualizar o gist que tem as tasks de projetos do meu Todoist.",
-  "main": "build/index.js",
+  "main": "src/index.js",
   "scripts": {
-    "prestart": "rm -rf ./build/",
-    "start": "npm-run-all --parallel --print-label watch:build watch:serve",
-    "deploy": "npm-run-all --serial --print-label build wt:create",
-    "build": "rollup -c",
-    "watch:build": "rollup -cw",
-    "watch:serve": "nodemon --exec \"npm run wt:serve\" --watch \"./build\"",
-    "wt:serve": "wt serve ./build/ --secrets-file ./.env --hostname localhost --port 1234",
-    "wt:create": "wt create -b ./build/ --secrets-file ./.env --name update-gist",
-    "wt:cronjob": "wt cron create --schedule \"0 * * * *\" -b ./build/ --secrets-file ./.env --name update-gist"
+    "prestart": "sucrase ./src -d ./build --transforms imports",
+    "start": "node build/",
+    "dev": "nodemon --config nodemon.json"
   },
-  "keywords": [
-    "typescript",
-    "webtask",
-    "cronjob"
-  ],
-  "author": "Micael Levi <mllc@icomp.ufam.edu.br> (micalevisk.github.io)",
+  "author": "Micael Levi (micalevisk.github.io)",
   "license": "MIT",
+  "engineStrict": true,
+  "engines": {
+    "node": ">=12.4.0"
+  },
   "dependencies": {
-    "gists": "^2.0.0",
-    "node-fetch": "^2.2.0",
-    "promise": "^8.0.2"
+    "@octokit/rest": "^16.35.2",
+    "dotenv-safe": "^8.2.0",
+    "node-fetch": "^2.2.0"
   },
   "devDependencies": {
-    "@types/node": "^10.12.1",
-    "@types/node-fetch": "^2.1.2",
-    "npm-run-all": "^4.1.5",
-    "rollup": "^0.67.0",
-    "rollup-plugin-typescript2": "^0.19.3",
-    "rollup-plugin-uglify-es": "0.0.1",
-    "typescript": "^3.1.6"
+    "nodemon": "^2.0.2",
+    "sucrase": "^3.10.1"
   }
 }

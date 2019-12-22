@@ -1,0 +1,16 @@
+name: Update gist with Todoist items
+on:
+  schedule:
+    - cron: '0 * * * *' # At minute 0 (AKA every hour)
+jobs:
+  update-gist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Update gist
+        uses: micalevisk/gist-auto-update@master
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          TODOIST_API_ENDPOINT: ${{ secrets.TODOIST_API_ENDPOINT }}
+
