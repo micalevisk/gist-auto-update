@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import allSettled from 'promise.allsettled';
 import debug from './debug';
 import * as _ from './utils';
 
@@ -84,7 +85,7 @@ function makeTasksGistFileWithMetadata(tasks, projectName) {
 /**
  *
  * @param {string[]} projectNames
- * @returns {Promise<ProjectMetaWithGistFile[]>}
+ * @returns {Promise<allSettled.PromiseResult<ProjectMetaWithGistFile, unknown>[]>}
  */
 export default function getProjects(projectNames) {
   log('will fetch the following projects: %o', projectNames);
@@ -93,9 +94,9 @@ export default function getProjects(projectNames) {
     const url = `${TODOIST_API_ENDPOINT}/?projectName=${projectName}`;
     log('fetching %o ...', url);
     return fetch(url)
-      .then(data => { log('%o done', projectName); return data.json(); })
+      .then(data => { log('fetch %o done', projectName); return data.json(); })
       .then(tasks => makeTasksGistFileWithMetadata(tasks, projectName))
   });
 
-  return Promise.all(whenProjects);
+  return allSettled(whenProjects);
 }

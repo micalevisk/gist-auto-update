@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "resolveJsonModule": true,
-    "target": "es2017",
+    "target": "esnext",
     "module": "commonjs",
-    "lib": ["es2017.object"],
+    "lib": ["esnext"],
     "checkJs": true,
     "alwaysStrict": true,
     "watch": false

@@ -35,7 +35,6 @@ class Gist {
         content: currGistFile.content,
       };
       return gistFiles;
-    // @ts-ignore
     }, Object.fromEntries(filesToDelete));
 
     log('will update gist with id %o', gistId);

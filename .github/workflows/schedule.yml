@@ -20,4 +20,3 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}
           TODOIST_API_ENDPOINT: ${{ secrets.TODOIST_API_ENDPOINT }}
-

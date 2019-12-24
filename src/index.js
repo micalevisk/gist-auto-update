@@ -105,7 +105,22 @@ function updateGist(newFilesWithPercent) {
   });
 }
 
+/**
+ *
+ * @param {import('promise.allsettled').PromiseResult<ProjectMetaWithGistFile, unknown>[]} results
+ * @returns {ProjectMetaWithGistFile[]}
+ */
+function filterFulfilledPromises(results) {
+  return results.reduce((acum, curr) => {
+    if (curr.status === 'fulfilled') {
+      acum.push(curr.value);
+    }
+    return acum;
+  }, []);
+}
+
 getProjects(projectNames)
+  .then(filterFulfilledPromises)
   .then(updateGist)
   .then(statusCode => { log('gist update exit with status code: %d', statusCode); return statusCode; })
   .catch(console.error);
