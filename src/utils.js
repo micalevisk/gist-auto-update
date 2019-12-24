@@ -31,6 +31,29 @@ export const formatAsPending = (str) => `**${str}**`;
 
 /**
  *
+ * @param {string} str
+ * @returns {string}
+ */
+export const formatAsTitle = (str) => `# ${str}\n`;
+
+/**
+ *
+ * @param {string} text
+ * @param {string} link
+ * @returns {string}
+ */
+export const formatAsHyperlink = (text, link) => `[${text}](${link})`;
+
+/**
+ *
+ * @param {string} projectName
+ * @param {number} numberTasks
+ * @returns {string}
+ */
+export const toFilename = (projectName, numberTasks) => `${projectName}_${numberTasks}.md`;
+
+/**
+ *
  * @param {string[]} strs
  * @returns {string}
  */

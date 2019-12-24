@@ -7,69 +7,40 @@ require('dotenv-safe').config({
   path: '.env',
 });
 
-import Octokit from '@octokit/rest';
 import projectNames from '../projectNames.json';
+import debug from './debug';
 import getProjects from './projects';
+import Gist from './gist';
 import * as _ from './utils';
+
+const log = debug();
 
 const {
   GIST_ID,
   GH_TOKEN,
 } = process.env;
 
-
-const octokit = new Octokit({ auth: `token ${GH_TOKEN}` });
-
-
-/**
- *
- * @param {Octokit} octokit
- * @param {object} configs
- * @param {string} configs.gistId
- * @param {string} configs.newDescription
- * @param {GistFile[]} configs.newFiles
- * @returns {Promise<number>} Resolves to status code.
- */
-async function updateGistById(octokit, { gistId, newDescription, newFiles }) {
-  const gist = await octokit.gists.get({ gist_id: gistId });
-
-  const gistOldFilenames = Object.keys(gist.data.files);
-  const filesToDelete = gistOldFilenames.map(oldFilename => [oldFilename, null]);
-
-  const files = newFiles.reduce((gistFiles, currGistFile) => {
-    gistFiles[currGistFile.filename] = {
-      content: currGistFile.content,
-    };
-    return gistFiles;
-  // @ts-ignore
-  }, Object.fromEntries(filesToDelete));
-
-  return octokit.gists.update({
-    description: newDescription,
-    gist_id: gistId,
-    files,
-  }).then(res => res.status);
-}
+const gist = new Gist(GH_TOKEN);
 
 
 /**
  *
- * @param {number[]} percents
+ * @param {ProjectMeta[]} projectsMeta
  * @param {string[]} projectNames
  * @returns {GistFile}
  */
-function createProgressGistFile(percents, projectNames) {
-  if (percents.length !== projectNames.length) {
-    throw Error('The `percents` and `projectNames` are not with same length.');
+function createProgressGistFile(projectsMeta, projectNames) {
+  if (projectsMeta.length !== projectNames.length) {
+    throw Error('The `projectsMeta` and `projectNames` are not with same length.');
   }
 
   const lines = [];
   const maxPadEnd = _.findLongestString(projectNames).length;
   for (let i = 0; i < projectNames.length; ++i) {
-    const name = projectNames[i];
-    const percent = percents[i];
+    const projectName = projectNames[i];
+    const percent = (projectsMeta[i].numberTasksDone/projectsMeta[i].numberTasks)*100;
     const line = [
-      name.padEnd(maxPadEnd),
+      projectName.padEnd(maxPadEnd),
       _.generateBarChart(percent, 21),
       percent.toFixed(1).toString().padStart(5) + '%',
     ];
@@ -82,14 +53,40 @@ function createProgressGistFile(percents, projectNames) {
   };
 }
 
+/**
+ *
+ * @param {ProjectMeta[]} projectsMeta
+ * @param {string[]} projectNames
+ * @returns {GistFile}
+ */
+function createSummaryGistFile(projectsMeta, projectNames) {
+  if (projectsMeta.length !== projectNames.length) {
+    throw Error('The `projectsMeta` and `projectNames` are not with same length.');
+  }
+
+  const lines = [
+    _.formatAsTitle('summary'),
+  ];
+  for (let i = 0; i < projectNames.length; ++i) {
+    const projectName = projectNames[i];
+    const line = `- ${_.formatAsHyperlink(projectName, projectsMeta[i].fileHyperlinkRef)}`;
+    lines.push(line);
+  }
+
+  return {
+    filename: '.summary.md',
+    content: lines.join('\n'),
+  };
+}
 
 /**
  *
- * @param {GistFileWithPercent[]} newFilesWithPercent
+ * @param {ProjectMetaWithGistFile[]} newFilesWithPercent
  * @returns {Promise<number>} Resolves to status code.
  */
 function updateGist(newFilesWithPercent) {
-  const [percents, newFiles] = newFilesWithPercent.reduce((acum, curr) => {
+  /** @type {[ProjectMeta[], GistFile[]]} */
+  const [projectsMeta, newFiles] = newFilesWithPercent.reduce((acum, curr) => {
     acum[0].push(curr[0]);
     acum[1].push(curr[1]);
     return acum;
@@ -97,18 +94,18 @@ function updateGist(newFilesWithPercent) {
 
   const updatedAtDate = (new Date()).toLocaleString('pt-BR', {timeZone: 'America/Manaus'})
   const newDescription = `📋 Reading List (updated at: ${updatedAtDate} [America/Manaus])`;
-  return updateGistById(octokit, {
+  return gist.updateGistById({
     gistId: GIST_ID,
     newDescription,
     newFiles: [
-      createProgressGistFile(percents, projectNames),
+      createProgressGistFile(projectsMeta, projectNames),
+      createSummaryGistFile(projectsMeta, projectNames),
       ...newFiles,
     ],
   });
 }
 
-
 getProjects(projectNames)
   .then(updateGist)
-  .then(console.log)
+  .then(statusCode => { log('gist update exit with status code: %d', statusCode); return statusCode; })
   .catch(console.error);

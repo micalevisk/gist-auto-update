@@ -1,7 +1,15 @@
+type ProjectMeta = {
+  numberTasks: number
+  numberTasksDone: number
+  fileHyperlinkRef: string
+}
+
 type GistFile = {
   filename: string|null
   content: string
 }
+
+type ProjectMetaWithGistFile = [ProjectMeta, GistFile]
 
 type TaskContent = {
   tag?: string
@@ -18,5 +26,3 @@ type Task = {
   priority: number
   content: TaskContent
 }
-
-type GistFileWithPercent = [number, GistFile]

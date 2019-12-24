@@ -4,9 +4,10 @@
   "description": "Atualizar o gist que tem as tasks de projetos do meu Todoist.",
   "main": "src/index.js",
   "scripts": {
-    "prestart": "sucrase ./src -d ./build --transforms imports",
-    "start": "node build/",
-    "dev": "nodemon --config nodemon.json",
+    "build": "sucrase ./src -d ./build --transforms imports",
+    "prestart": "npm run build",
+    "start": "DEBUG=gist-auto-update* node build/",
+    "dev": "DEBUG=gist-auto-update* nodemon --config nodemon.json",
     "clean": "rm -rf build/"
   },
   "author": "Micael Levi (micalevisk.github.io)",
@@ -17,6 +18,7 @@
   },
   "dependencies": {
     "@octokit/rest": "^16.35.2",
+    "debug": "^4.1.1",
     "dotenv-safe": "^8.2.0",
     "node-fetch": "^2.2.0",
     "sucrase": "^3.10.1"
