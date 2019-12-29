@@ -3,11 +3,12 @@
     "resolveJsonModule": true,
     "target": "esnext",
     "module": "commonjs",
-    "lib": ["esnext"],
+    "moduleResolution": "node",
+    "lib": ["es2019.array", "esnext", "dom"],
     "checkJs": true,
     "alwaysStrict": true,
     "watch": false
   },
   "exclude": ["node_modules"],
-  "include": ["./src/**/*"]
+  "include": ["./src/**/*", "wt-function/"]
 }

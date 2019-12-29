@@ -1,0 +1,25 @@
+{
+  "name": "wt-function",
+  "version": "1.0.0",
+  "description": "",
+  "main": "todoist-access.js",
+  "scripts": {
+    "wt:serve": "wt serve . --secrets-file ./.env --hostname localhost --port 1234",
+    "wt:create": "wt create -b . --secrets-file ./.env --name todoist-access",
+    "wt:logs": "wt logs"
+  },
+  "keywords": [
+    "webtask.io"
+  ],
+  "author": "Micael Levi <mykael2010@hotmail.com> (micalevisk.github.io)",
+  "license": "MIT",
+  "engineStrict": true,
+  "engines": {
+    "node": ">=12.4.0"
+  },
+  "dependencies": {
+    "array.prototype.flat": "^1.2.3",
+    "axios": "^0.19.0",
+    "uuid": "^3.3.3"
+  }
+}
