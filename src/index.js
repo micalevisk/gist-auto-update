@@ -14,6 +14,7 @@ const Gist = require('./gist');
 const _  = require('./utils');
 
 const log = debug();
+const logError = debug('error');
 
 const projectNames = Object.keys(projectsIdByName);
 
@@ -73,12 +74,12 @@ async function createSummaryGistFile(projectsMeta) {
 
 /**
  *
- * @param {ProjectMetaWithGistFile[]} newFilesWithPercent
+ * @param {ProjectMetaWithGistFile[]} newFilesWithMetadata
  * @returns {Promise<number>} Resolves to status code.
  */
-async function updateGist(newFilesWithPercent) {
+async function updateGist(newFilesWithMetadata) {
   /** @type {[ProjectMeta[], GistFile[]]} */
-  const [projectsMeta, newFiles] = newFilesWithPercent.reduce((acum, curr) => {
+  const [projectsMeta, newFiles] = newFilesWithMetadata.reduce((acum, curr) => {
     acum[0].push(curr[0]);
     acum[1].push(curr[1]);
     return acum;
@@ -103,8 +104,13 @@ async function updateGist(newFilesWithPercent) {
   });
 }
 
-
-getProjects(projectsIdByName)
-  .then(updateGist)
-  .then(statusCode => { log('gist update exit with status code: %d', statusCode); return statusCode; })
-  .catch(console.error);
+(async function start() {
+  try {
+    const newFilesWithMetadata = await getProjects(projectsIdByName);
+    const updateStatusCode = await updateGist(newFilesWithMetadata);
+    log('gist update exit with status code: %d', updateStatusCode);
+  } catch (err) {
+    logError(err);
+    process.exit(1);
+  }
+})();

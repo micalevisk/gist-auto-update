@@ -91,15 +91,11 @@ module.exports = async function getProjects(projectsIdByName) {
   const whenProjects = [];
   for (const projectName in projectsIdByName) {
     const projectId = projectsIdByName[projectName];
-    try {
-      const projectData = await fetchProjectData(projectId);
-      log('fetch project %d done', projectId);
-      if (projectData.total > 0) {
-        const gistFileWithMetadata = makeTasksGistFileWithMetadata(projectId, projectData, projectName);
-        whenProjects.push(gistFileWithMetadata);
-      }
-    } catch (err) {
-      logError(err);
+    const projectData = await fetchProjectData(projectId);
+    log('fetch project %d done', projectId);
+    if (projectData.total > 0) {
+      const whenGistFileWithMetadata = makeTasksGistFileWithMetadata(projectId, projectData, projectName);
+      whenProjects.push(whenGistFileWithMetadata);
     }
   }
 
