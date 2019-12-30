@@ -173,7 +173,11 @@ class Todoist {
    * @param {number} [projectId]
    * @returns {Promise<TodoistSyncAPI.Section[]>}
    */
-  async getSections(projectId) {
+  async _getSections(projectId) {
+    if (typeof projectId !== 'number') {
+      throw TypeError(`The argument (projectId) must be a 'number' (${typeof projectId})`);
+    }
+
     const { data } = await this.conn.post('sync', {
       sync_token: '*',
       resource_types: '["sections"]',
@@ -191,7 +195,11 @@ class Todoist {
    * @param {number} projectId
    * @returns {Promise<TodoistSyncAPI.ProjectData>}
    */
-  async getProjectData(projectId) {
+  async _getProjectData(projectId) {
+    if (typeof projectId !== 'number') {
+      throw TypeError(`The argument (projectId) must be a 'number' (${typeof projectId})`);
+    }
+
     const { data } = await this.conn.post('projects/get_data', {
       project_id: projectId.toString()
     });
@@ -200,25 +208,19 @@ class Todoist {
 
   /**
    *
-   * @param {object} paramsValues
-   * @param {number} [paramsValues.projectId]
-   * @param {number} [paramsValues.parentId]
-   * @param {number} [paramsValues.sectionId]
+   * @param {string} paramKey
+   * @param {string} paramValue
    * @returns {Promise<TodoistSyncAPI.ArchivedProjectData>}
    */
-  async getArchivedProjectItems({projectId, parentId, sectionId}) {
-    /** @type {[string,number][]} */
-    const paramsKeyAndValues = [// key-value pairs in priority order
-      ['project_id', projectId],
-      ['parent_id', parentId],
-      ['section_id', sectionId],
-    ];
-    const argIdx = paramsKeyAndValues.findIndex(([, argValue]) => typeof argValue === 'number');
-    if (argIdx < 0) {
-      throw Error('missing some argument.');
+  async _getArchivedProjectItems(paramKey, paramValue) {
+    if (typeof paramKey !== 'string' || !paramKey.trim()) {
+      throw TypeError(`The first argument (paramKey) must be a 'string' (${typeof paramKey})`);
+    }
+    if (typeof paramValue !== 'string') {
+      throw TypeError(`The second argument (paramValue) must be a 'string' (${typeof paramValue})`);
     }
 
-    const params = { [paramsKeyAndValues[argIdx][0]]: paramsKeyAndValues[argIdx][1].toString() };
+    const params = { [paramKey]: paramValue };
     let { data } = await this.conn.post('archive/items', params);
 
     while (data.has_more) { // To fetch all pages
@@ -235,6 +237,34 @@ class Todoist {
     }
 
     return data;
+  }
+
+
+  /**
+   *
+   * @param {number} projectId
+   * @returns {Promise<TodoistSyncAPI.ArchivedProjectData>}
+   */
+  async getArchivedProjectItemsUnderProject(projectId) {
+    return this._getArchivedProjectItems('project_id', projectId.toString());
+  }
+
+  /**
+   *
+   * @param {number} parentId
+   * @returns {Promise<TodoistSyncAPI.ArchivedProjectData>}
+   */
+  async getArchivedProjectItemsUnderParentItem(parentId) {
+    return this._getArchivedProjectItems('parent_id', parentId.toString());
+  }
+
+  /**
+   *
+   * @param {number} sectionId
+   * @returns {Promise<TodoistSyncAPI.ArchivedProjectData>}
+   */
+  async getArchivedProjectItemsUnderSection(sectionId) {
+    return this._getArchivedProjectItems('section_id', sectionId.toString());
   }
 
 
@@ -263,7 +293,7 @@ class Todoist {
    * @returns {Promise<SectionMap>}
    */
   async getSectionsGroupedByProjectId(projectId) {
-    const sections = await this.getSections(projectId);
+    const sections = await this._getSections(projectId);
 
     /** @type {SectionMap} */
     const sectionsNameById = sections.reduce((sectionsMap, section) => {
@@ -285,7 +315,7 @@ class Todoist {
    * @returns {Promise<[TodoistPartialResponse, number[]]>}
    */
   getWellFormattedProjectData(projectId, sectionsNameById) {
-    return this.getProjectData(projectId)
+    return this._getProjectData(projectId)
       .then(data => mapProjectDataToItems(data, sectionsNameById));
   }
 
@@ -296,15 +326,25 @@ class Todoist {
    * @param {number[]} [parentIds]
    */
   getProjectArchivedTasks(projectId, sectionsNameById, parentIds) {
-    const getTasksFromResponseData = data =>
-      formatProjectItems(data.items, sectionsNameById)[0];
+    /**
+     * @param {TodoistSyncAPI.ArchivedProjectData} data
+     * @returns {Task[]}
+     */
+    const getTasksFromResponseData = data => formatProjectItems(data.items, sectionsNameById)[0];
+
+    /**
+     *
+     * @param {Promise<TodoistSyncAPI.ArchivedProjectData>} whenData
+     * @returns {Promise<Task[]>}
+     */
+    const getTasks = whenData => whenData.then(getTasksFromResponseData);
 
     const {null: _, ...projectSectionsNameById} = sectionsNameById;
     const sectionsIds = Object.keys(projectSectionsNameById).map(Number);
 
-    const whenTasksByProjectId = this.getArchivedProjectItems({ projectId }).then(getTasksFromResponseData);
+    const whenTasksByProjectId = getTasks( this.getArchivedProjectItemsUnderProject(projectId) );
     const whenTasksBySectionId = sectionsIds.map(sectionId =>
-      this.getArchivedProjectItems({ sectionId }).then(getTasksFromResponseData)
+      getTasks( this.getArchivedProjectItemsUnderSection(sectionId) )
     );
 
     const whenAllKindTasks = [
@@ -314,8 +354,7 @@ class Todoist {
 
     if (parentIds && parentIds.length) {
       for (const parentId of parentIds) {
-        const whenArchivedProjectTasks = this.getArchivedProjectItems({ projectId, parentId })
-          .then(getTasksFromResponseData);
+        const whenArchivedProjectTasks = getTasks( this.getArchivedProjectItemsUnderParentItem(parentId) );
         whenAllKindTasks.push(whenArchivedProjectTasks);
       }
 
