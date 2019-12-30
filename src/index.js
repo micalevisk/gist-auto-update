@@ -7,11 +7,11 @@ require('dotenv-safe').config({
   path: '.env',
 });
 
-const projectsIdByName = require('./projectsIdByName.json');
 const debug = require('./debug');
 const getProjects = require('./projects');
 const Gist = require('./gist');
 const _  = require('./utils');
+const projectsIdByName = require('../projectsIdByName.json');
 
 const log = debug();
 const logError = debug('error');
