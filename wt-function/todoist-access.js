@@ -18,6 +18,7 @@ module.exports = async function todoistAccess(ctx, cb) {
     const sectionsNameById = await todoist.getSectionsGroupedByProjectId(projectId);
     const [projectData, categoryIds] = await todoist.getWellFormattedProjectData(projectId, sectionsNameById);
     const archivedItems = await todoist.getProjectArchivedTasks(projectId, sectionsNameById, categoryIds);
+    // console.log(archivedItems);
 
     const items = {
       done: projectData.items.done,

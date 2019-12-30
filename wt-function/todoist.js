@@ -324,6 +324,7 @@ class Todoist {
    * @param {number} projectId
    * @param {SectionMap} [sectionsNameById]
    * @param {number[]} [parentIds]
+   * @returns {Promise<Task[]>}
    */
   getProjectArchivedTasks(projectId, sectionsNameById, parentIds) {
     /**
@@ -357,12 +358,10 @@ class Todoist {
         const whenArchivedProjectTasks = getTasks( this.getArchivedProjectItemsUnderParentItem(parentId) );
         whenAllKindTasks.push(whenArchivedProjectTasks);
       }
-
-      return Promise.all(whenAllKindTasks)
-        .then(fulfilledPromises => fulfilledPromises.flat()); // Ignoring parentId-level
     }
 
-    return Promise.all(whenAllKindTasks);
+    return Promise.all(whenAllKindTasks)
+      .then(fulfilledPromises => fulfilledPromises.flat());
   }
 
 }
