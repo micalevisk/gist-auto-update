@@ -1,6 +1,7 @@
 // @ts-check
 /// <reference path="../globals.d.ts" />
 const axios = require('axios').default;
+const AxiosLogger = require('axios-logger');
 const uuid = require('uuid');
 
 // @ts-ignore
@@ -16,15 +17,6 @@ const RE_IGNORE_SECTION = /\u2716$/;
 const RE_CATEGORY_ITEM = /:$/;
 const NIL = -1;
 
-
-/**
- *
- * @param {any[]} arr
- * @returns {any[]}
- */
-function uniqueValues(arr) {
-  return Array.from( new Set(arr) );
-}
 
 /**
  *
@@ -75,17 +67,6 @@ function formatContent(content) {
  */
 function mapProjectDataToItems(data, sectionsNameById) {
   const { project, items } = data;
-
-  /*
-  const [nonCheckedItems, checkedItems] = items.reduce((pair, item) => {
-    pair[ item.checked ].push(item);
-    return pair;
-  }, [[], []]);
-  const [wellFormattedCheckedItems, categoryIdsChecked] = formatProjectItems(checkedItems, sectionsNameById);
-  const [wellFormattedNoncheckedItems, categoryIdsNonChecked] = formatProjectItems(nonCheckedItems, sectionsNameById);
-
-  const categoryIds = uniqueValues( [categoryIdsChecked, categoryIdsNonChecked].flat() );
-  */
 
   const [wellFormattedItems, categoryIds] = formatProjectItems(items, sectionsNameById);
   const [wellFormattedNoncheckedItems, wellFormattedCheckedItems] = wellFormattedItems.reduce((itemsPair, item) => {
@@ -183,6 +164,8 @@ class Todoist {
         'X-Request-Id': uuid(),
       },
     });
+
+    this.conn.interceptors.request.use(AxiosLogger.requestLogger, AxiosLogger.errorLogger);
   }
 
   /**
@@ -217,15 +200,25 @@ class Todoist {
 
   /**
    *
-   * @param {number} projectId
-   * @param {number} [parentId]
+   * @param {object} paramsValues
+   * @param {number} [paramsValues.projectId]
+   * @param {number} [paramsValues.parentId]
+   * @param {number} [paramsValues.sectionId]
    * @returns {Promise<TodoistSyncAPI.ArchivedProjectData>}
    */
-  async getArchivedProjectItems(projectId, parentId) {
-    const params = parentId
-      ? { parent_id: parentId.toString() }
-      : { project_id: projectId.toString() };
+  async getArchivedProjectItems({projectId, parentId, sectionId}) {
+    /** @type {[string,number][]} */
+    const paramsKeyAndValues = [// key-value pairs in priority order
+      ['project_id', projectId],
+      ['parent_id', parentId],
+      ['section_id', sectionId],
+    ];
+    const argIdx = paramsKeyAndValues.findIndex(([, argValue]) => typeof argValue === 'number');
+    if (argIdx < 0) {
+      throw Error('missing some argument.');
+    }
 
+    const params = { [paramsKeyAndValues[argIdx][0]]: paramsKeyAndValues[argIdx][1].toString() };
     let { data } = await this.conn.post('archive/items', params);
 
     while (data.has_more) { // To fetch all pages
@@ -275,7 +268,6 @@ class Todoist {
     /** @type {SectionMap} */
     const sectionsNameById = sections.reduce((sectionsMap, section) => {
       if (!RE_IGNORE_SECTION.test(section.name.trim())) {
-        console.log(section.name)
         sectionsMap[ section.id ] = formatContent(section.name);
       }
       return sectionsMap;
@@ -307,16 +299,22 @@ class Todoist {
     const getTasksFromResponseData = data =>
       formatProjectItems(data.items, sectionsNameById)[0];
 
-    const whenTasksByProjectId = this.getArchivedProjectItems(projectId)
-      .then(getTasksFromResponseData);
+    const {null: _, ...projectSectionsNameById} = sectionsNameById;
+    const sectionsIds = Object.keys(projectSectionsNameById).map(Number);
+
+    const whenTasksByProjectId = this.getArchivedProjectItems({ projectId }).then(getTasksFromResponseData);
+    const whenTasksBySectionId = sectionsIds.map(sectionId =>
+      this.getArchivedProjectItems({ sectionId }).then(getTasksFromResponseData)
+    );
+
+    const whenAllKindTasks = [
+      whenTasksByProjectId,
+      whenTasksBySectionId,
+    ].flat();
 
     if (parentIds && parentIds.length) {
-      const whenAllKindTasks = [
-        whenTasksByProjectId,
-      ];
-
       for (const parentId of parentIds) {
-        const whenArchivedProjectTasks = this.getArchivedProjectItems(projectId, parentId)
+        const whenArchivedProjectTasks = this.getArchivedProjectItems({ projectId, parentId })
           .then(getTasksFromResponseData);
         whenAllKindTasks.push(whenArchivedProjectTasks);
       }
@@ -325,7 +323,7 @@ class Todoist {
         .then(fulfilledPromises => fulfilledPromises.flat()); // Ignoring parentId-level
     }
 
-    return whenTasksByProjectId;
+    return Promise.all(whenAllKindTasks);
   }
 
 }
