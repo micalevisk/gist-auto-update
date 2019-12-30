@@ -1,5 +1,5 @@
-import Octokit from '@octokit/rest';
-import debug from './debug';
+const Octokit = require('@octokit/rest');
+const debug = require('./debug');
 
 const log = debug('gist');
 
@@ -11,7 +11,7 @@ class Gist {
    */
   constructor(ghToken) {
     this.octokit = new Octokit({ auth: `token ${ghToken}` });
-    log('authenticate with token %o', ghToken.slice(0, 3) + '...');
+    log('maybe authenticated with token %o', ghToken.slice(0, 3) + '...');
   }
 
   /**
@@ -39,17 +39,22 @@ class Gist {
 
     log('will update gist with id %o', gistId);
 
-    const updatedGistResponse = await this.octokit.gists.update({
-      description: newDescription,
-      gist_id: gistId,
-      files,
-    });
+    try {
+      const updatedGistResponse = await this.octokit.gists.update({
+        description: newDescription,
+        gist_id: gistId,
+        files,
+      });
 
-    log('update done');
+      log('update done!');
 
-    return updatedGistResponse.status;
+      return updatedGistResponse.status;
+    } catch (err) {
+      log('update fails!!');
+      throw err;
+    }
   }
 
 }
 
-export default Gist;
+module.exports = Gist;

@@ -7,13 +7,15 @@ require('dotenv-safe').config({
   path: '.env',
 });
 
-import projectNames from '../projectNames.json';
-import debug from './debug';
-import getProjects from './projects';
-import Gist from './gist';
-import * as _ from './utils';
+const projectsIdByName = require('./projectsIdByName.json');
+const debug = require('./debug');
+const getProjects = require('./projects');
+const Gist = require('./gist');
+const _  = require('./utils');
 
 const log = debug();
+
+const projectNames = Object.keys(projectsIdByName);
 
 const {
   GIST_ID,
@@ -26,56 +28,46 @@ const gist = new Gist(GH_TOKEN);
 /**
  *
  * @param {ProjectMeta[]} projectsMeta
- * @param {string[]} projectNames
- * @returns {GistFile}
+ * @returns {Promise<GistFile>}
  */
-function createProgressGistFile(projectsMeta, projectNames) {
-  if (projectsMeta.length !== projectNames.length) {
-    throw Error('The `projectsMeta` and `projectNames` are not with same length.');
-  }
-
+async function createProgressGistFile(projectsMeta) {
   const lines = [];
   const maxPadEnd = _.findLongestString(projectNames).length;
-  for (let i = 0; i < projectNames.length; ++i) {
-    const projectName = projectNames[i];
-    const percent = (projectsMeta[i].numberTasksDone/projectsMeta[i].numberTasks)*100;
+  for (const projectMeta of projectsMeta) {
+    if (projectMeta.numberTasks <= 0) { // To prevent `NaN` outputs
+      continue;
+    }
+
+    const percent = (1 - (projectMeta.numberPendingTasks/projectMeta.numberTasks)) * 100;
     const line = [
-      projectName.padEnd(maxPadEnd),
+      projectMeta.name.padEnd(maxPadEnd),
       _.generateBarChart(percent, 21),
       percent.toFixed(1).toString().padStart(5) + '%',
     ];
     lines.push(line.join(' '));
   }
 
+  const content = await _.renderTemplateFile('progress', {
+    lines,
+  });
   return {
     filename: '.progress.',
-    content: lines.join('\n'),
+    content,
   };
 }
 
 /**
  *
  * @param {ProjectMeta[]} projectsMeta
- * @param {string[]} projectNames
- * @returns {GistFile}
+ * @returns {Promise<GistFile>}
  */
-function createSummaryGistFile(projectsMeta, projectNames) {
-  if (projectsMeta.length !== projectNames.length) {
-    throw Error('The `projectsMeta` and `projectNames` are not with same length.');
-  }
-
-  const lines = [
-    _.formatAsTitle('summary'),
-  ];
-  for (let i = 0; i < projectNames.length; ++i) {
-    const projectName = projectNames[i];
-    const line = `- ${_.formatAsHyperlink(projectName, projectsMeta[i].fileHyperlinkRef)}`;
-    lines.push(line);
-  }
-
+async function createSummaryGistFile(projectsMeta) {
+  const content = await _.renderTemplateFile('summary', {
+    projectsMeta,
+  });
   return {
     filename: '.summary.md',
-    content: lines.join('\n'),
+    content,
   };
 }
 
@@ -84,7 +76,7 @@ function createSummaryGistFile(projectsMeta, projectNames) {
  * @param {ProjectMetaWithGistFile[]} newFilesWithPercent
  * @returns {Promise<number>} Resolves to status code.
  */
-function updateGist(newFilesWithPercent) {
+async function updateGist(newFilesWithPercent) {
   /** @type {[ProjectMeta[], GistFile[]]} */
   const [projectsMeta, newFiles] = newFilesWithPercent.reduce((acum, curr) => {
     acum[0].push(curr[0]);
@@ -94,33 +86,25 @@ function updateGist(newFilesWithPercent) {
 
   const updatedAtDate = (new Date()).toLocaleString('pt-BR', {timeZone: 'America/Manaus'})
   const newDescription = `📋 Reading List (updated at: ${updatedAtDate} [America/Manaus])`;
+
+  const [progressFile, summaryFile] = await Promise.all([
+    createProgressGistFile(projectsMeta),
+    createSummaryGistFile(projectsMeta),
+  ]);
+
   return gist.updateGistById({
     gistId: GIST_ID,
     newDescription,
     newFiles: [
-      createProgressGistFile(projectsMeta, projectNames),
-      createSummaryGistFile(projectsMeta, projectNames),
+      progressFile,
+      summaryFile,
       ...newFiles,
     ],
   });
 }
 
-/**
- *
- * @param {import('promise.allsettled').PromiseResult<ProjectMetaWithGistFile, unknown>[]} results
- * @returns {ProjectMetaWithGistFile[]}
- */
-function filterFulfilledPromises(results) {
-  return results.reduce((acum, curr) => {
-    if (curr.status === 'fulfilled') {
-      acum.push(curr.value);
-    }
-    return acum;
-  }, []);
-}
 
-getProjects(projectNames)
-  .then(filterFulfilledPromises)
+getProjects(projectsIdByName)
   .then(updateGist)
   .then(statusCode => { log('gist update exit with status code: %d', statusCode); return statusCode; })
   .catch(console.error);

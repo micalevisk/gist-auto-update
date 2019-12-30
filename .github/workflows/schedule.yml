@@ -7,15 +7,11 @@ jobs:
   update-gist:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - name: Install node
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@master
         with:
-          node-version: '12.x'
-      - name: Install NPM dependencies
-        run: npm ci
+          ref: master
       - name: Update gist
-        run: npm start
+        uses: micalevisk/gist-auto-update@master
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}

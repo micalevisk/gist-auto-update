@@ -1,14 +1,11 @@
 {
   "name": "gist-auto-update",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Atualizar o gist que tem as tasks de projetos do meu Todoist.",
   "main": "src/index.js",
   "scripts": {
-    "build": "sucrase ./src -d ./build --transforms imports",
-    "prestart": "npm run build",
-    "start": "DEBUG=gist-auto-update* node build/",
-    "dev": "DEBUG=gist-auto-update* nodemon --config nodemon.json",
-    "clean": "rm -rf build/"
+    "start": "DEBUG=gist-auto-update* node .",
+    "dev": "cross-env DEBUG=gist-auto-update* nodemon --config nodemon.json"
   },
   "author": "Micael Levi (micalevisk.github.io)",
   "license": "MIT",
@@ -20,11 +17,12 @@
     "@octokit/rest": "^16.35.2",
     "debug": "^4.1.1",
     "dotenv-safe": "^8.2.0",
-    "node-fetch": "^2.2.0",
-    "promise.allsettled": "^1.0.2",
-    "sucrase": "^3.10.1"
+    "ejs": "^3.0.1",
+    "escape-html": "^1.0.3",
+    "node-fetch": "^2.2.0"
   },
   "devDependencies": {
+    "cross-env": "^6.0.3",
     "nodemon": "^2.0.2"
   }
 }

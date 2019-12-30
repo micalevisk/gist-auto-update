@@ -1,10 +1,10 @@
-import fetch from 'node-fetch';
-import allSettled from 'promise.allsettled';
-import debug from './debug';
-import * as _ from './utils';
+const fetch = require('node-fetch').default;
+const debug = require('./debug');
+const _ = require('./utils');
 
 const { TODOIST_API_ENDPOINT } = process.env;
 const log = debug('projects');
+const logError = debug('projects:error');
 
 const EMOJIS = {
   '_book'    : '📖',
@@ -23,80 +23,85 @@ const EMOJIS = {
   }
 };
 
-const TABLE_COLUMNS = {
-  separators: [':-:', ':-:', ':-'],
-  names: [
-    '#',
-    'TAG',
-    'NAME',
-  ],
-};
-
-
 /**
  *
- * @param {Task[]} tasks
- * @param {string} projectName
- * @returns {ProjectMetaWithGistFile} The task progress and the respective gist file metadata.
+ * @param {number} projectId
+ * @param {TodoistAccessResponse} projectData
+ * @param {string} [projectName=projectData.name]
+ * @returns {Promise<ProjectMetaWithGistFile>} The task progress and the respective gist file metadata.
  */
-function makeTasksGistFileWithMetadata(tasks, projectName) {
-  const numberTasks = tasks.length;
-  let numberTasksDone = 0;
+async function makeTasksGistFileWithMetadata(projectId, projectData, projectName = projectData.name) {
+  const numberPendingTasks = projectData.items.pending.length; // ??
+  const {
+    total: numberTasks,
+    sectionsNameById,
+  } = projectData;
 
-  const tableContent = tasks.map(({ checked, content }, idx) => {
-    const row = {
-      [TABLE_COLUMNS.names[0]]: `${idx + 1}`,
-      [TABLE_COLUMNS.names[1]]: EMOJIS.get(content.tag),
-      [TABLE_COLUMNS.names[2]]: `[${ _.removeYouTubeKeyword(content.text) }](${content.link})`,
-    };
+  /** @type {ItemsBySectionName} */
+  const pendingGroupedBySectionId = _.groupBy(projectData.items.pending, 'sectionId');
+  const { null: rootTasks = [], ...remainingTasksBySectionId} = pendingGroupedBySectionId;
 
-    if (checked) {
-      numberTasksDone++; // side-effect
-    } else {
-      row[TABLE_COLUMNS.names[0]] = _.formatAsPending(row[TABLE_COLUMNS.names[0]]);
-      row[TABLE_COLUMNS.names[2]] = _.formatAsPending(row[TABLE_COLUMNS.names[2]]);
-    }
-
-    return row;
+  const content = await _.renderTemplateFile('project', {
+    EMOJIS,
+    projectId,
+    projectName,
+    rootTasks,
+    tasksInSections: Object.entries(remainingTasksBySectionId),
+    archived: projectData.items.archived,
+    sectionsNameById,
   });
-
-  const contentTitle = `${projectName} (${numberTasksDone}/${numberTasks}) ${_.formatAsHyperlink('[↥]', '#summary')}`;
-  const fileHyperlinkRef = `#${projectName}-${numberTasksDone}${numberTasks}-`;
-
-  const lines = [
-    _.formatAsTitle(contentTitle),
-    _.jsonToMarkdownTable(TABLE_COLUMNS, tableContent),
-    _.formatAsHyperlink('[↥]', fileHyperlinkRef),
-  ];
-
   return [
     {// project metadata
+      id: projectId,
+      name: projectName,
       numberTasks,
-      numberTasksDone,
-      fileHyperlinkRef,
+      numberPendingTasks,
     },
     {// gist file parameters
       filename: _.toFilename(projectName, numberTasks),
-      content: lines.join('\n'),
+      content,
     }
   ];
 }
 
 /**
  *
- * @param {string[]} projectNames
- * @returns {Promise<allSettled.PromiseResult<ProjectMetaWithGistFile, unknown>[]>}
+ * @param {number} projectId
+ * @returns {Promise<TodoistAccessResponse>}
  */
-export default function getProjects(projectNames) {
-  log('will fetch the following projects: %o', projectNames);
+const fetchProjectData = (projectId) => {
+  const url = new URL(TODOIST_API_ENDPOINT);
+  url.search = new URLSearchParams({ projectId: projectId.toString() }).toString();
+  log('fetching project %o ...', url.href);
+  return fetch(url).then(res => res.json())
+    .then((data) => {
+      if ('error' in data) throw data;
+      return data;
+    });
+};
 
-  const whenProjects = projectNames.map(projectName => {
-    const url = `${TODOIST_API_ENDPOINT}/?projectName=${projectName}`;
-    log('fetching %o ...', url);
-    return fetch(url)
-      .then(data => { log('fetch %o done', projectName); return data.json(); })
-      .then(tasks => makeTasksGistFileWithMetadata(tasks, projectName))
-  });
+/**
+ *
+ * @param {{[k:string]:number}} projectsIdByName
+ * @returns {Promise<ProjectMetaWithGistFile[]>}
+ */
+module.exports = async function getProjects(projectsIdByName) {
+  log('will fetch the following projects: %o', projectsIdByName);
 
-  return allSettled(whenProjects);
+  const whenProjects = [];
+  for (const projectName in projectsIdByName) {
+    const projectId = projectsIdByName[projectName];
+    try {
+      const projectData = await fetchProjectData(projectId);
+      log('fetch project %d done', projectId);
+      if (projectData.total > 0) {
+        const gistFileWithMetadata = makeTasksGistFileWithMetadata(projectId, projectData, projectName);
+        whenProjects.push(gistFileWithMetadata);
+      }
+    } catch (err) {
+      logError(err);
+    }
+  }
+
+  return Promise.all(whenProjects);
 }

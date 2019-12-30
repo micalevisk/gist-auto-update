@@ -1,0 +1,129 @@
+<%
+const GO_TO_TOP = '[↥]';
+
+currId = projectId;
+someTaskHasTag = rootTasks.find(task => task.content.tag);
+
+const primaryTitle = `${projectName} (${rootTasks.length})`;
+-%>
+<H1 id="<%= currId %>"><a href="#summary">[↥]</a> <%- primaryTitle -%></H1>
+
+<table>
+  <thead>
+    <tr>
+      <th align="center">#</th>
+      <% if (someTaskHasTag) { -%>
+      <th align="center">TAG</th>
+      <% }; -%>
+      <th align="left">NAME</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% rootTasks.forEach(function(task, idx) { -%>
+    <%
+    const content = task.content;
+    const text = helpers.removeYouTubeKeyword(content.text);
+    -%>
+    <tr>
+      <td align="center"><%= idx + 1 -%></td>
+      <% if (someTaskHasTag) { -%>
+      <td align="center"><%= EMOJIS.get(content.tag) -%></td>
+      <% } -%>
+      <td align="left"><%- helpers.formatAsHyperlink(text, content.link) -%></td>
+    </tr>
+    <% }); -%>
+    <tr>
+      <td align="center"><%- helpers.formatAsHyperlink(GO_TO_TOP, '#' + currId) -%></td>
+    </tr>
+  </tbody>
+</table>
+
+<% tasksInSections.forEach(function ([sectionId, tasks], idx) { -%>
+<%
+currId = sectionId;
+someTaskHasTag = tasks.find(task => task.content.tag);
+const content = sectionsNameById[sectionId];
+const title = `${helpers.formatAsHyperlink(content.text, content.link)} (${tasks.length})`;
+-%>
+<H2 id="<%= currId %>"><a href="#summary">[↥]</a> <%- title -%></H2>
+
+<table>
+  <thead>
+    <tr>
+      <th align="center">#</th>
+      <% if (someTaskHasTag) { -%>
+      <th align="center">TAG</th>
+      <% } -%>
+      <th align="left">NAME</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% tasks.forEach(function(task, idx) { -%>
+    <%
+    const content = task.content;
+    const text = helpers.removeYouTubeKeyword(content.text);
+    -%>
+    <tr>
+      <td align="center"><%= idx + 1 -%></td>
+      <% if (someTaskHasTag) { -%>
+      <td align="center"><%= EMOJIS.get(content.tag) -%></td>
+      <% } -%>
+      <td align="left"><%- helpers.formatAsHyperlink(text, content.link) -%></td>
+    </tr>
+    <% }); -%>
+    <tr>
+      <td align="center"><%- helpers.formatAsHyperlink(GO_TO_TOP, '#' + currId) -%></td>
+    </tr>
+  </tbody>
+</table>
+<% }); -%>
+
+---
+
+<%
+currId = `${projectId}-archived-items`;
+someTaskHasTag = archived.find(task => task.content.tag);
+const secondaryTitle = `Archived items (${archived.length})`;
+-%>
+<H3 id="<%= currId %>"><%- secondaryTitle -%></H3>
+
+<details>
+
+  <table>
+    <thead>
+      <tr>
+        <th align="center">#</th>
+        <% if (someTaskHasTag) { -%>
+        <th align="center">TAG</th>
+        <% }; -%>
+        <th align="left">SECTION</th>
+        <th align="left">NAME</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% archived.forEach(function(task, idx) { -%>
+      <%
+      const content = task.content;
+      const text = helpers.removeYouTubeKeyword(content.text);
+      const sectionName = (sectionsNameById[task.sectionId] === ':root') ? '' : sectionsNameById[task.sectionId].text;
+      -%>
+      <tr>
+        <td align="center"><%= idx + 1 -%></td>
+        <% if (someTaskHasTag) { -%>
+        <td align="center"><%= EMOJIS.get(content.tag) -%></td>
+        <% } -%>
+        <td align="left"><%- sectionName -%></td>
+        <% if (task.checked) { -%>
+          <td align="left"><%- helpers.formatAsHyperlink(text, content.link) -%></td>
+        <% } else { -%>
+          <td align="left"><%- helpers.formatAsPending(helpers.formatAsHyperlink(text, content.link)) -%></td>
+        <% } -%>
+      </tr>
+      <% }); -%>
+      <tr>
+        <td align="center"><%- helpers.formatAsHyperlink(GO_TO_TOP, '#' + currId) -%></td>
+      </tr>
+    </tbody>
+  </table>
+
+</details>
