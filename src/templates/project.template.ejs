@@ -1,12 +1,13 @@
 <%
 const GO_TO_TOP = '[↥]';
+const elGoToSummary = helpers.formatAsHyperlink(GO_TO_TOP, '#summary');
 
 currId = projectId;
-someTaskHasTag = rootTasks.find(task => task.content.tag);
+someTaskHasTag = helpers.isSomeTaskHasTag(rootTasks);
 
 const primaryTitle = `${projectName} (${rootTasks.length})`;
 -%>
-<H1 id="<%= currId %>"><a href="#summary">[↥]</a> <%- primaryTitle -%></H1>
+<H1 id="<%= currId %>"><%- elGoToSummary -%> <%- primaryTitle -%></H1>
 
 <table>
   <thead>
@@ -41,11 +42,11 @@ const primaryTitle = `${projectName} (${rootTasks.length})`;
 <% tasksInSections.forEach(function ([sectionId, tasks], idx) { -%>
 <%
 currId = sectionId;
-someTaskHasTag = tasks.find(task => task.content.tag);
+someTaskHasTag = helpers.isSomeTaskHasTag(tasks);
 const content = sectionsNameById[sectionId];
 const title = `${helpers.formatAsHyperlink(content.text, content.link)} (${tasks.length})`;
 -%>
-<H2 id="<%= currId %>"><a href="#summary">[↥]</a> <%- title -%></H2>
+<H2 id="<%= currId %>"><%- elGoToSummary -%> <%- title -%></H2>
 
 <table>
   <thead>
@@ -82,7 +83,7 @@ const title = `${helpers.formatAsHyperlink(content.text, content.link)} (${tasks
 
 <%
 currId = `${projectId}-archived-items`;
-someTaskHasTag = archived.find(task => task.content.tag);
+someTaskHasTag = helpers.isSomeTaskHasTag(archived);
 const secondaryTitle = `Archived items (${archived.length})`;
 -%>
 <H3 id="<%= currId %>"><%- secondaryTitle -%></H3>
