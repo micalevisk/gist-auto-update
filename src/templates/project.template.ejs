@@ -2,9 +2,9 @@
 const GO_TO_TOP = '[↥]';
 const elGoToSummary = helpers.formatAsHyperlink(GO_TO_TOP, '#summary');
 
-currId = projectId;
+generateUniqueId = id => `pending-items-${id}`;
+currId = generateUniqueId(projectId);
 someTaskHasTag = helpers.isSomeTaskHasTag(rootTasks);
-
 const primaryTitle = `${projectName} (${rootTasks.length})`;
 -%>
 <H1 id="<%= currId %>"><%- elGoToSummary -%> <%- primaryTitle -%></H1>
@@ -13,35 +13,31 @@ const primaryTitle = `${projectName} (${rootTasks.length})`;
   <thead>
     <tr>
       <th align="center">#</th>
-      <% if (someTaskHasTag) { -%>
+      <%_ if (someTaskHasTag) { _%>
       <th align="center">TAG</th>
-      <% }; -%>
+      <%_ }; _%>
       <th align="left">NAME</th>
     </tr>
   </thead>
   <tbody>
-    <% rootTasks.forEach(function(task, idx) { -%>
-    <%
-    const content = task.content;
-    const text = content.text;
-    -%>
+    <%_ rootTasks.forEach(function(task, idx) { _%>
     <tr>
       <td align="center"><%= idx + 1 -%></td>
-      <% if (someTaskHasTag) { -%>
-      <td align="center"><%= EMOJIS.get(content.tag) -%></td>
-      <% } -%>
-      <td align="left"><%- helpers.formatAsHyperlink(text, content.link) -%></td>
+      <%_ if (someTaskHasTag) { _%>
+      <td align="center"><%= EMOJIS.get(task.content.tag) -%></td>
+      <%_ } _%>
+      <td align="left"><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
     </tr>
-    <% }); -%>
+    <%_ }); _%>
     <tr>
       <td align="center"><%- helpers.formatAsHyperlink(GO_TO_TOP, '#' + currId) -%></td>
     </tr>
   </tbody>
 </table>
 
-<% tasksInSections.forEach(function ([sectionId, tasks], idx) { -%>
+<%_ tasksInSections.forEach(function ([sectionId, tasks], idx) { _%>
 <%
-currId = sectionId;
+currId = generateUniqueId(sectionId);
 someTaskHasTag = helpers.isSomeTaskHasTag(tasks);
 const content = sectionsNameById[sectionId];
 const title = `${helpers.formatAsHyperlink(content.text, content.link)} (${tasks.length})`;
@@ -52,39 +48,36 @@ const title = `${helpers.formatAsHyperlink(content.text, content.link)} (${tasks
   <thead>
     <tr>
       <th align="center">#</th>
-      <% if (someTaskHasTag) { -%>
+      <%_ if (someTaskHasTag) { _%>
       <th align="center">TAG</th>
-      <% } -%>
+      <%_ } _%>
       <th align="left">NAME</th>
     </tr>
   </thead>
   <tbody>
-    <% tasks.forEach(function(task, idx) { -%>
-    <%
-    const content = task.content;
-    const text = content.text;
-    -%>
+    <%_ tasks.forEach(function(task, idx) { _%>
     <tr>
       <td align="center"><%= idx + 1 -%></td>
-      <% if (someTaskHasTag) { -%>
-      <td align="center"><%= EMOJIS.get(content.tag) -%></td>
-      <% } -%>
-      <td align="left"><%- helpers.formatAsHyperlink(text, content.link) -%></td>
+      <%_ if (someTaskHasTag) { _%>
+      <td align="center"><%= EMOJIS.get(task.content.tag) -%></td>
+      <%_ } _%>
+      <td align="left"><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
     </tr>
-    <% }); -%>
+    <%_ }); _%>
     <tr>
       <td align="center"><%- helpers.formatAsHyperlink(GO_TO_TOP, '#' + currId) -%></td>
     </tr>
   </tbody>
 </table>
-<% }); -%>
+<%_ }); _%>
 
 ---
 
 <%
-currId = `${projectId}-archived-items`;
+generateUniqueId = id => `archived-items-${id}`;
+currId = generateUniqueId(projectId);
 someTaskHasTag = helpers.isSomeTaskHasTag(archived);
-const secondaryTitle = `Archived items (${archived.length})`;
+const secondaryTitle = `Archived items (${archivedRootTasks.length})`;
 -%>
 <H3 id="<%= currId %>"><%- secondaryTitle -%></H3>
 
@@ -94,37 +87,66 @@ const secondaryTitle = `Archived items (${archived.length})`;
     <thead>
       <tr>
         <th align="center">#</th>
-        <% if (someTaskHasTag) { -%>
+        <%_ if (someTaskHasTag) { _%>
         <th align="center">TAG</th>
-        <% }; -%>
-        <th align="left">SECTION</th>
+        <%_ }; _%>
         <th align="left">NAME</th>
       </tr>
     </thead>
     <tbody>
-      <% archived.forEach(function(task, idx) { -%>
-      <%
-      const content = task.content;
-      const text = content.text;
-      const sectionName = (sectionsNameById[task.sectionId] === ':root') ? '' : sectionsNameById[task.sectionId].text;
-      -%>
+      <%_ archivedRootTasks.forEach(function(task, idx) { _%>
       <tr>
         <td align="center"><%= idx + 1 -%></td>
-        <% if (someTaskHasTag) { -%>
-        <td align="center"><%= EMOJIS.get(content.tag) -%></td>
-        <% } -%>
-        <td align="left"><%- sectionName -%></td>
-        <% if (task.checked) { -%>
-          <td align="left"><%- helpers.formatAsHyperlink(text, content.link) -%></td>
-        <% } else { -%>
-          <td align="left"><%- helpers.formatAsPending(helpers.formatAsHyperlink(text, content.link)) -%></td>
-        <% } -%>
+        <%_ if (someTaskHasTag) { _%>
+        <td align="center"><%= EMOJIS.get(task.content.tag) -%></td>
+        <%_ } _%>
+        <%_ if (task.checked) { _%>
+        <td align="left"><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
+        <%_ } else { _%>
+        <td align="left"><%- helpers.formatAsPending(helpers.formatAsHyperlink(task.content.text, task.content.link)) -%></td>
+        <%_ } _%>
       </tr>
-      <% }); -%>
+      <%_ }); _%>
       <tr>
         <td align="center"><%- helpers.formatAsHyperlink(GO_TO_TOP, '#' + currId) -%></td>
       </tr>
     </tbody>
   </table>
 
-</details>
+  <%_ archivedTasksInSections.forEach(function ([sectionId, tasks], idx) { _%>
+  <%
+  currId = generateUniqueId(sectionId);
+  someTaskHasTag = helpers.isSomeTaskHasTag(tasks);
+  const content = sectionsNameById[sectionId];
+  const title = `${helpers.formatAsHyperlink(content.text, content.link)} (${tasks.length})`;
+  %>
+  <H4 id="<%= currId %>"><%- elGoToSummary -%> <%- title -%></H4>
+
+  <table>
+    <thead>
+      <tr>
+        <th align="center">#</th>
+        <%_ if (someTaskHasTag) { _%>
+        <th align="center">TAG</th>
+        <%_ } _%>
+        <th align="left">NAME</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%_ tasks.forEach(function(task, idx) { _%>
+      <tr>
+        <td align="center"><%= idx + 1 -%></td>
+        <%_ if (someTaskHasTag) { _%>
+        <td align="center"><%= EMOJIS.get(task.content.tag) -%></td>
+        <%_ } _%>
+        <td align="left"><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
+      </tr>
+      <%_ }); _%>
+      <tr>
+        <td align="center"><%- helpers.formatAsHyperlink(GO_TO_TOP, '#' + currId) -%></td>
+      </tr>
+    </tbody>
+  </table>
+  <%_ }); _%>
+
+</details

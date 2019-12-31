@@ -1,6 +1,13 @@
 const md = require('markdown-it')();
 const escapeHtml = require('escape-html');
 
+/**
+ *
+ * @param {Task[]} tasks
+ * @returns {boolean}
+ */
+module.exports.isSomeTaskHasTag = tasks =>
+  !!tasks.find(task => task.content.tag);
 
 /**
  *

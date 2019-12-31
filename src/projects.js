@@ -4,7 +4,6 @@ const _ = require('./utils');
 
 const { TODOIST_API_ENDPOINT } = process.env;
 const log = debug('projects');
-const logError = debug('projects:error');
 
 const EMOJIS = {
   '_book'    : '📖',
@@ -39,15 +38,27 @@ async function makeTasksGistFileWithMetadata(projectId, projectData, projectName
 
   /** @type {ItemsBySectionName} */
   const pendingGroupedBySectionId = _.groupBy(projectData.items.pending, 'sectionId');
-  const { null: rootTasks = [], ...remainingTasksBySectionId} = pendingGroupedBySectionId;
+  const { null: rootTasks = [], ...remainingTasksBySectionId} = pendingGroupedBySectionId; // TODO: identificar como 'pending'
+
+  /** @type {ItemsBySectionName} */
+  const archivedGroupedBySectionId = _.groupBy(projectData.items.archived, 'sectionId');
+  const {
+    null: archivedRootTasks = [],
+    ...archivedRemainingTasksBySectionId
+  } = archivedGroupedBySectionId;
 
   const content = await _.renderTemplateFile('project', {
     EMOJIS,
     projectId,
     projectName,
+
     rootTasks,
     tasksInSections: Object.entries(remainingTasksBySectionId),
+
     archived: projectData.items.archived,
+    archivedRootTasks,
+    archivedTasksInSections: Object.entries(archivedRemainingTasksBySectionId),
+
     sectionsNameById,
   });
   return [
