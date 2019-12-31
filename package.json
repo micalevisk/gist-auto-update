@@ -19,6 +19,7 @@
     "dotenv-safe": "^8.2.0",
     "ejs": "^3.0.1",
     "escape-html": "^1.0.3",
+    "markdown-it": "^10.0.0",
     "node-fetch": "^2.2.0"
   },
   "devDependencies": {

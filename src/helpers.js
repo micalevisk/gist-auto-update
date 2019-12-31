@@ -1,3 +1,4 @@
+const md = require('markdown-it')();
 const escapeHtml = require('escape-html');
 
 /**
@@ -24,8 +25,9 @@ module.exports.formatAsPending = (str) =>
  */
 module.exports.formatAsHyperlink = (text, link) => {
   const escapedText = escapeHtml(text);
+  const htmlText = md.renderInline(escapedText);
   if (!link || !link.trim()) {
     return escapedText;
   }
-  return `<a href="${link}" target="_blank">${escapedText}</a>`;
+  return `<a href="${link}" target="_blank">${htmlText}</a>`;
 }
