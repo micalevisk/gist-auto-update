@@ -15,8 +15,8 @@ const RE_YT_PLAYLIST = /\s*-\s*YouTube$/;
 const RE_TAG = /^\{([^}]+)\}\s+(.+)/;
 const RE_HYPERTEXT_1 = /^([^\(\s]+)\s+(?:\s*\((.+)\))\B/;
 const RE_HYPERTEXT_2 = /^\[([^\(\s]+)\](?:\s*\((.+)\))\B/;
-const RE_IGNORE_ITEM = /\u2716:?$/;// https://apps.timwhitlock.info/unicode/inspect/hex/2716
-const RE_IGNORE_SECTION = /\u2716$/;
+const RE_IGNORE_ITEM = /[\u2716✖️✖]:?$/;// https://apps.timwhitlock.info/unicode/inspect/hex/2716
+const RE_IGNORE_SECTION = /[\u2716✖️✖]$/;
 const RE_CATEGORY_ITEM = /:$/;
 const NIL = -1;
 
