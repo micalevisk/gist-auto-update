@@ -10,13 +10,31 @@ Array.prototype.flat = require('array.prototype.flat').getPolyfill();
 /** @type {ROOT_SECTION} */
 const ROOT_SECTION = ':root';
 
-const RE_ITEM_CONTENT = /^(?:\{([^}]+)\}\s*)?([^(\s]+)(?:\s*\((.+)\))?/;
 const RE_PLAYLIST_CONTENT = /\bplaylist\b/;
+const RE_YT_PLAYLIST = /\s*-\s*YouTube$/;
+const RE_TAG = /^\{([^}]+)\}\s+(.+)/;
+const RE_HYPERTEXT_1 = /^([^\(\s]+)\s+(?:\s*\((.+)\))\B/;
+const RE_HYPERTEXT_2 = /^\[([^\(\s]+)\](?:\s*\((.+)\))\B/;
 const RE_IGNORE_ITEM = /\u2716:?$/;// https://apps.timwhitlock.info/unicode/inspect/hex/2716
 const RE_IGNORE_SECTION = /\u2716$/;
 const RE_CATEGORY_ITEM = /:$/;
 const NIL = -1;
 
+/**
+ *
+ * @param {object} obj
+ * @returns {object}
+ */
+function onlyTruthyValuesOnPojo(obj) {
+  const newObj = Object.keys(obj).reduce((newObj, prop) => {
+    if (obj[prop]) {
+      newObj[prop] = obj[prop];
+    }
+    return newObj;
+  }, {});
+
+  return newObj;
+}
 
 /**
  *
@@ -24,9 +42,20 @@ const NIL = -1;
  * @returns {string}
  */
 function formatDate(dateStr) {
+  if (typeof dateStr !== 'string') {
+    throw TypeError(`dateStr is not a string (${typeof dateStr})`);
+  }
+
   const [, day, month, year] = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
   return `${month} ${day}, ${year}`;
 }
+
+/**
+ *
+ * @param {string} str
+ * @returns {string}
+ */
+const removeYouTubeKeyword = (str) => str.replace(RE_YT_PLAYLIST, '');
 
 /**
  *
@@ -34,29 +63,39 @@ function formatDate(dateStr) {
  * @returns {TaskContent}
  */
 function formatContent(content) {
-  const matches = content.match(RE_ITEM_CONTENT);
-  if (!matches) return {
-    text: content
+  if (typeof content !== 'string') {
+    throw TypeError(`content is not a string (${typeof content})`);
+  }
+
+  const parsedContent = {
+    text: undefined,
+    tag: undefined,
+    link: undefined,
   };
 
-  const [, rawTag, link, text] = matches;
+  const matchesTag = content.match(RE_TAG);
+  if (matchesTag) {
+    [, parsedContent.tag, content] = matchesTag;
+  } else {
+    if (RE_PLAYLIST_CONTENT.test(content)) {
+      parsedContent.tag = 'playlist';
+    }
+  }
 
-  if (!link || !text) return {
-    text: content
-  };
+  // Now `content` do not have a tag on it
+  const matchesHypertext1 = content.match(RE_HYPERTEXT_1);
+  if (matchesHypertext1) {
+    [, parsedContent.link, content] = matchesHypertext1;
+  } else {
+    const matchesHypertext2 = content.match(RE_HYPERTEXT_2);
+    if (matchesHypertext2) {
+      [, content, parsedContent.link] = matchesHypertext2;
+    }
+  }
 
-  const contentMetadata = {
-    link,
-    text,
-  };
-
-  const tag = rawTag
-    ? rawTag.toLowerCase()
-    : (RE_PLAYLIST_CONTENT.test(content) && 'playlist');
-
-  return tag
-    ? { ...contentMetadata, tag }
-    : contentMetadata;
+  parsedContent.text = removeYouTubeKeyword(content);
+  parsedContent.tag = parsedContent.tag && parsedContent.tag.toLowerCase();
+  return onlyTruthyValuesOnPojo(parsedContent);
 }
 
 /**

@@ -16,7 +16,6 @@ type TaskContent = {
   tag?: string
   link?: string
   text: string
-  [key: string]: string | undefined
 }
 
 type Task = {
