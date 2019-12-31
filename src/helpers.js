@@ -1,13 +1,6 @@
 const md = require('markdown-it')();
 const escapeHtml = require('escape-html');
 
-/**
- *
- * @param {string} str
- * @returns {string}
- */
-module.exports.removeYouTubeKeyword = (str) =>
-  str.replace(/ - YouTube$/, '');
 
 /**
  *

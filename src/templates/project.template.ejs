@@ -22,7 +22,7 @@ const primaryTitle = `${projectName} (${rootTasks.length})`;
     <% rootTasks.forEach(function(task, idx) { -%>
     <%
     const content = task.content;
-    const text = helpers.removeYouTubeKeyword(content.text);
+    const text = content.text;
     -%>
     <tr>
       <td align="center"><%= idx + 1 -%></td>
@@ -61,7 +61,7 @@ const title = `${helpers.formatAsHyperlink(content.text, content.link)} (${tasks
     <% tasks.forEach(function(task, idx) { -%>
     <%
     const content = task.content;
-    const text = helpers.removeYouTubeKeyword(content.text);
+    const text = content.text;
     -%>
     <tr>
       <td align="center"><%= idx + 1 -%></td>
@@ -104,7 +104,7 @@ const secondaryTitle = `Archived items (${archived.length})`;
       <% archived.forEach(function(task, idx) { -%>
       <%
       const content = task.content;
-      const text = helpers.removeYouTubeKeyword(content.text);
+      const text = content.text;
       const sectionName = (sectionsNameById[task.sectionId] === ':root') ? '' : sectionsNameById[task.sectionId].text;
       -%>
       <tr>

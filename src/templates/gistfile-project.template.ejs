@@ -3,7 +3,7 @@
 #|TAG|NAME
 :-:|:-:|:-
 <% pending.forEach(function(task, idx) { -%>
-<%= idx + 1 %>| |[<%= helpers.removeYouTubeKeyword(task.content.text) %>](<%= task.content.link %>)
+<%= idx + 1 %>| |[<%= task.content.text %>](<%= task.content.link %>)
 <% }) -%>
 [[↥]](#<%= projectId %>)
 
@@ -18,7 +18,7 @@
 #|TAG|NAME
 :-:|:-:|:-
 <% archived.forEach(function(task, idx) { -%>
-<%= idx + 1 %>| |[<%= helpers.removeYouTubeKeyword(task.content.text) %>](<%= task.content.link %>)
+<%= idx + 1 %>| |[<%= task.content.text %>](<%= task.content.link %>)
 <% }) -%>
 [[↥]](#<%=projectId%>-archived-items)
 
