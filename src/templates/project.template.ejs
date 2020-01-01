@@ -26,7 +26,7 @@ const primaryTitle = `${projectName} (${rootTasks.length})`;
       <%_ if (someTaskHasTag) { _%>
       <td align="center"><%= helpers.resolveTag(task.content.tag) -%></td>
       <%_ } _%>
-      <td align="left"><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
+      <td align="left"><%= helpers.resolvePriority(task.priority) -%><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
     </tr>
     <%_ }); _%>
     <tr>
@@ -61,7 +61,7 @@ const title = `${helpers.formatAsHyperlink(content.text, content.link)} (${tasks
       <%_ if (someTaskHasTag) { _%>
       <td align="center"><%= helpers.resolveTag(task.content.tag) -%></td>
       <%_ } _%>
-      <td align="left"><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
+      <td align="left"><%= helpers.resolvePriority(task.priority) -%><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
     </tr>
     <%_ }); _%>
     <tr>
@@ -101,9 +101,9 @@ const secondaryTitle = `Archived items (${archivedRootTasks.length})`;
         <td align="center"><%= helpers.resolveTag(task.content.tag) -%></td>
         <%_ } _%>
         <%_ if (task.checked) { _%>
-        <td align="left"><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
+        <td align="left"><%= helpers.resolvePriority(task.priority) -%><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
         <%_ } else { _%>
-        <td align="left"><%- helpers.formatAsPending(helpers.formatAsHyperlink(task.content.text, task.content.link)) -%></td>
+        <td align="left"><%= helpers.resolvePriority(task.priority) -%><%- helpers.formatAsPending(helpers.formatAsHyperlink(task.content.text, task.content.link)) -%></td>
         <%_ } _%>
       </tr>
       <%_ }); _%>
@@ -139,7 +139,7 @@ const secondaryTitle = `Archived items (${archivedRootTasks.length})`;
         <%_ if (someTaskHasTag) { _%>
         <td align="center"><%= helpers.resolveTag(task.content.tag) -%></td>
         <%_ } _%>
-        <td align="left"><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
+        <td align="left"><%= helpers.resolvePriority(task.priority) -%><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
       </tr>
       <%_ }); _%>
       <tr>

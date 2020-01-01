@@ -1,21 +1,20 @@
 const md = require('markdown-it')();
 const escapeHtml = require('escape-html');
 
-const EMOJIS = {
-  '_book'    : '📖',
-  '_read'    : '🧐',
-  '_learn'   : '🧠',
-  '_vide'    : '👀',
-  '_playlist': '💾',
+const TAG_EMOJIS = {
+  'book'    : '📖',
+  'read'    : '🧐',
+  'learn'   : '🧠',
+  'vide'    : '👀',
+  'playlist': '💾',
+};
 
-  /**
-   *
-   * @param {string} tag
-   * @returns {string}
-   */
-  get(tag) {
-    return (tag && this[ `_${tag.toLowerCase()}` ]) || '';
-  }
+/** @type {{[k in TodoistSyncAPI.PRIORITY_LEVELS]: string}} */
+const PRIORITY_EMOJIS = {
+  1: '',
+  2: '🏁',
+  3: '🏴',
+  4: '🚩',
 };
 
 /**
@@ -23,9 +22,16 @@ const EMOJIS = {
  * @param {string} tag
  * @returns {string}
  */
-module.exports.resolveTag = (tag) => {
-  return EMOJIS.get(tag);
-};
+module.exports.resolveTag = tag =>
+  (tag && TAG_EMOJIS[ tag.toLowerCase() ]) || '';
+
+/**
+ *
+ * @param {TodoistSyncAPI.PRIORITY_LEVELS} taskPriority
+ * @returns {string}
+ */
+module.exports.resolvePriority = taskPriority =>
+  ((PRIORITY_EMOJIS[taskPriority|0] || '') + ' ').trimStart();
 
 /**
  *
