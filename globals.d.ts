@@ -22,7 +22,7 @@ type Task = {
   checked: boolean
   dateAdded: string
   id: number
-  priority: Todoist.PRIORITY_LEVELS
+  priority: TodoistSyncAPI.PRIORITY_LEVELS
   content: TaskContent
   parentId: number
   sectionId: number
