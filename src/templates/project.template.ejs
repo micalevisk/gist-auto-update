@@ -24,7 +24,7 @@ const primaryTitle = `${projectName} (${rootTasks.length})`;
     <tr>
       <td align="center"><%= idx + 1 -%></td>
       <%_ if (someTaskHasTag) { _%>
-      <td align="center"><%= EMOJIS.get(task.content.tag) -%></td>
+      <td align="center"><%= helpers.resolveTag(task.content.tag) -%></td>
       <%_ } _%>
       <td align="left"><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
     </tr>
@@ -59,7 +59,7 @@ const title = `${helpers.formatAsHyperlink(content.text, content.link)} (${tasks
     <tr>
       <td align="center"><%= idx + 1 -%></td>
       <%_ if (someTaskHasTag) { _%>
-      <td align="center"><%= EMOJIS.get(task.content.tag) -%></td>
+      <td align="center"><%= helpers.resolveTag(task.content.tag) -%></td>
       <%_ } _%>
       <td align="left"><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
     </tr>
@@ -98,7 +98,7 @@ const secondaryTitle = `Archived items (${archivedRootTasks.length})`;
       <tr>
         <td align="center"><%= idx + 1 -%></td>
         <%_ if (someTaskHasTag) { _%>
-        <td align="center"><%= EMOJIS.get(task.content.tag) -%></td>
+        <td align="center"><%= helpers.resolveTag(task.content.tag) -%></td>
         <%_ } _%>
         <%_ if (task.checked) { _%>
         <td align="left"><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
@@ -137,7 +137,7 @@ const secondaryTitle = `Archived items (${archivedRootTasks.length})`;
       <tr>
         <td align="center"><%= idx + 1 -%></td>
         <%_ if (someTaskHasTag) { _%>
-        <td align="center"><%= EMOJIS.get(task.content.tag) -%></td>
+        <td align="center"><%= helpers.resolveTag(task.content.tag) -%></td>
         <%_ } _%>
         <td align="left"><%- helpers.formatAsHyperlink(task.content.text, task.content.link) -%></td>
       </tr>

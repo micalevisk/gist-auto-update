@@ -5,22 +5,6 @@ const _ = require('./utils');
 const { TODOIST_API_ENDPOINT } = process.env;
 const log = debug('projects');
 
-const EMOJIS = {
-  '_book'    : '📖',
-  '_read'    : '🧐',
-  '_learn'   : '🧠',
-  '_vide'    : '👀',
-  '_playlist': '💾',
-
-  /**
-   *
-   * @param {string} tag
-   * @returns {string}
-   */
-  get(tag) {
-    return (tag && this[ `_${tag.toLowerCase()}` ]) || '';
-  }
-};
 
 /**
  *
@@ -48,7 +32,6 @@ async function makeTasksGistFileWithMetadata(projectId, projectData, projectName
   } = archivedGroupedBySectionId;
 
   const content = await _.renderTemplateFile('project', {
-    EMOJIS,
     projectId,
     projectName,
 
