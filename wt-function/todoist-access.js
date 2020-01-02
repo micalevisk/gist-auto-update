@@ -1,4 +1,4 @@
-// @ts-check
+'use latest';
 const Todoist = require('./todoist');
 
 module.exports = async function todoistAccess(ctx, cb) {

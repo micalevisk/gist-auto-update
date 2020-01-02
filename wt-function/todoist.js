@@ -1,8 +1,7 @@
-// @ts-check
-/// <reference path="../globals.d.ts" />
 const axios = require('axios').default;
 const AxiosLogger = require('axios-logger');
 const uuid = require('uuid');
+const itemFormatters = require('./item-formatters');
 
 // @ts-ignore
 Array.prototype.flat = require('array.prototype.flat').getPolyfill();
@@ -10,93 +9,10 @@ Array.prototype.flat = require('array.prototype.flat').getPolyfill();
 /** @type {ROOT_SECTION} */
 const ROOT_SECTION = ':root';
 
-const RE_PLAYLIST_CONTENT = /\bplaylist\b/;
-const RE_YT_PLAYLIST = /\s*-\s*YouTube$/;
-const RE_TAG = /^\{([^}]+)\}\s+(.+)/;
-const RE_HYPERTEXT_1 = /^([^\(\s]+)\s+(?:\s*\((.+)\))\B/;
-const RE_HYPERTEXT_2 = /^\[([^\(\s]+)\](?:\s*\((.+)\))\B/;
 const RE_IGNORE_ITEM = /[\u2716✖️✖]:?$/;// https://apps.timwhitlock.info/unicode/inspect/hex/2716
 const RE_IGNORE_SECTION = /[\u2716✖️✖]$/;
 const RE_CATEGORY_ITEM = /:$/;
 const NIL = -1;
-
-/**
- *
- * @param {object} obj
- * @returns {object}
- */
-function onlyTruthyValuesOnPojo(obj) {
-  const newObj = Object.keys(obj).reduce((newObj, prop) => {
-    if (obj[prop]) {
-      newObj[prop] = obj[prop];
-    }
-    return newObj;
-  }, {});
-
-  return newObj;
-}
-
-/**
- *
- * @param {string} dateStr
- * @returns {string}
- */
-function formatDate(dateStr) {
-  if (typeof dateStr !== 'string') {
-    throw TypeError(`dateStr is not a string (${typeof dateStr})`);
-  }
-
-  const [, day, month, year] = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  return `${month} ${day}, ${year}`;
-}
-
-/**
- *
- * @param {string} str
- * @returns {string}
- */
-const removeYouTubeKeyword = (str) => str.replace(RE_YT_PLAYLIST, '');
-
-/**
- *
- * @param {string} content
- * @returns {TaskContent}
- */
-function formatContent(content) {
-  if (typeof content !== 'string') {
-    throw TypeError(`content is not a string (${typeof content})`);
-  }
-
-  const parsedContent = {
-    text: undefined,
-    tag: undefined,
-    link: undefined,
-  };
-
-  const matchesTag = content.match(RE_TAG);
-  if (matchesTag) {
-    [, parsedContent.tag, content] = matchesTag;
-  } else {
-    if (RE_PLAYLIST_CONTENT.test(content)) {
-      parsedContent.tag = 'playlist';
-    }
-  }
-
-  // Now `content` do not have a tag on it
-  const matchesHypertext1 = content.match(RE_HYPERTEXT_1);
-  if (matchesHypertext1) {
-    [, parsedContent.link, content] = matchesHypertext1;
-  } else {
-    const matchesHypertext2 = content.match(RE_HYPERTEXT_2);
-    if (matchesHypertext2) {
-      [, content, parsedContent.link] = matchesHypertext2;
-    }
-  }
-
-  parsedContent.text = removeYouTubeKeyword(content);
-  parsedContent.tag = parsedContent.tag && parsedContent.tag.toLowerCase();
-  return onlyTruthyValuesOnPojo(parsedContent);
-}
 
 /**
  *
@@ -136,12 +52,12 @@ function formatProjectItems(items, sectionsNameById = { null: ROOT_SECTION }) {
   /** @param {TodoistSyncAPI.Item} item */
   const formatItem = item => ({
     checked: !!item.checked,
-    dateAdded: formatDate(item.date_added),
+    dateAdded: itemFormatters.formatDate(item.date_added),
     id: item.id,
     parentId: item.parent_id,
     sectionId: item.section_id,
     priority: item.priority,
-    content: formatContent(item.content),
+    content: itemFormatters.formatContent(item.content),
   });
 
   const selectedTasks = [];
@@ -337,7 +253,7 @@ class Todoist {
     /** @type {SectionMap} */
     const sectionsNameById = sections.reduce((sectionsMap, section) => {
       if (!RE_IGNORE_SECTION.test(section.name.trim())) {
-        sectionsMap[ section.id ] = formatContent(section.name);
+        sectionsMap[ section.id ] = itemFormatters.formatContent(section.name);
       }
       return sectionsMap;
     }, {
