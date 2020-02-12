@@ -50,8 +50,8 @@ function makeTextContentFormatter() {
 function makeContentFormmatter() {
   const RE_PLAYLIST_CONTENT = /\bplaylist\b/;
   const RE_TAG = /^\{([^}]+)\}\s+(.+)/;
-  const RE_HYPERTEXT_1 = /^([^\(\s]+)\s+(?:\s*\((.+)\))\B/;
-  const RE_HYPERTEXT_2 = /^\[([^\(\s]+)\](?:\s*\((.+)\))\B/;
+  const RE_HYPERTEXT_1 = /^\[([^\]]+)](?:\s*\((.+)\))\B/; // [This text will be hyperlinked](http://todoist.com/)
+  const RE_HYPERTEXT_2 = /([^\s]+)\s+\(([^)]+)\)/;        //  http://todoist.com/ (This text will be hyperlinked)
 
   const formatText = makeTextContentFormatter();
   const formatTag = tag => tag && tag.toLowerCase();
@@ -85,11 +85,11 @@ function makeContentFormmatter() {
     // Now `content` do not have a tag on it
     const matchesHypertext1 = itemContent.match(RE_HYPERTEXT_1);
     if (matchesHypertext1) {
-      [, parsedContent.link, itemContent] = matchesHypertext1;
+      [, itemContent, parsedContent.link] = matchesHypertext1;
     } else {
       const matchesHypertext2 = itemContent.match(RE_HYPERTEXT_2);
       if (matchesHypertext2) {
-        [, itemContent, parsedContent.link] = matchesHypertext2;
+        [, parsedContent.link, itemContent] = matchesHypertext2;
       }
     }
 
