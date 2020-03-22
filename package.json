@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "start": "DEBUG=gist-auto-update* node .",
-    "dev": "cross-env DEBUG=gist-auto-update* nodemon --config nodemon.json"
+    "dev": "cross-env DEBUG=gist-auto-update* nodemon --config nodemon.json",
+    "format": "prettier --write **/*.js"
   },
   "author": "Micael Levi (micalevisk.github.io)",
   "license": "MIT",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "cross-env": "^6.0.3",
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.2",
+    "prettier": "^2.0.1"
   }
 }

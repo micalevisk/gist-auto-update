@@ -5,7 +5,6 @@ const _ = require('./utils');
 const { TODOIST_API_ENDPOINT } = process.env;
 const log = debug('projects');
 
-
 /**
  *
  * @param {number} projectId
@@ -13,16 +12,17 @@ const log = debug('projects');
  * @param {string} [projectName=projectData.name]
  * @returns {Promise<ProjectMetaWithGistFile>} The task progress and the respective gist file metadata.
  */
-async function makeTasksGistFileWithMetadata(projectId, projectData, projectName = projectData.name) {
+async function makeTasksGistFileWithMetadata(
+  projectId,
+  projectData,
+  projectName = projectData.name,
+) {
   const numberPendingTasks = projectData.items.pending.length; // ??
-  const {
-    total: numberTasks,
-    sectionsNameById,
-  } = projectData;
+  const { total: numberTasks, sectionsNameById } = projectData;
 
   /** @type {ItemsBySectionName} */
   const pendingGroupedBySectionId = _.groupBy(projectData.items.pending, 'sectionId');
-  const { null: rootTasks = [], ...remainingTasksBySectionId} = pendingGroupedBySectionId; // TODO: identificar como 'pending'
+  const { null: rootTasks = [], ...remainingTasksBySectionId } = pendingGroupedBySectionId; // TODO: identificar como 'pending'
 
   /** @type {ItemsBySectionName} */
   const archivedGroupedBySectionId = _.groupBy(projectData.items.archived, 'sectionId');
@@ -45,16 +45,18 @@ async function makeTasksGistFileWithMetadata(projectId, projectData, projectName
     sectionsNameById,
   });
   return [
-    {// project metadata
+    {
+      // project metadata
       id: projectId,
       name: projectName,
       numberTasks,
       numberPendingTasks,
     },
-    {// gist file parameters
+    {
+      // gist file parameters
       filename: _.toFilename(projectName, numberTasks),
       content,
-    }
+    },
   ];
 }
 
@@ -63,12 +65,15 @@ async function makeTasksGistFileWithMetadata(projectId, projectData, projectName
  * @param {number} projectId
  * @returns {Promise<TodoistAccessResponse>}
  */
-const fetchProjectData = (projectId) => {
+const fetchProjectData = projectId => {
   const url = new URL(TODOIST_API_ENDPOINT);
-  url.search = new URLSearchParams({ projectId: projectId.toString() }).toString();
+  url.search = new URLSearchParams({
+    projectId: projectId.toString(),
+  }).toString();
   log('fetching project %o ...', url.href);
-  return fetch(url).then(res => res.json())
-    .then((data) => {
+  return fetch(url)
+    .then(res => res.json())
+    .then(data => {
       if ('error' in data) throw data;
       return data;
     });
@@ -88,10 +93,14 @@ module.exports = async function getProjects(projectsIdByName) {
     const projectData = await fetchProjectData(projectId);
     log('fetch project %d done', projectId);
     if (projectData.total > 0) {
-      const whenGistFileWithMetadata = makeTasksGistFileWithMetadata(projectId, projectData, projectName);
+      const whenGistFileWithMetadata = makeTasksGistFileWithMetadata(
+        projectId,
+        projectData,
+        projectName,
+      );
       whenProjects.push(whenGistFileWithMetadata);
     }
   }
 
   return Promise.all(whenProjects);
-}
+};

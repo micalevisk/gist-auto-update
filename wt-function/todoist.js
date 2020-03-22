@@ -9,7 +9,7 @@ Array.prototype.flat = require('array.prototype.flat').getPolyfill();
 /** @type {ROOT_SECTION} */
 const ROOT_SECTION = ':root';
 
-const RE_IGNORE_ITEM = /[\u2716✖️✖]:?$/;// https://apps.timwhitlock.info/unicode/inspect/hex/2716
+const RE_IGNORE_ITEM = /[\u2716✖️✖]:?$/; // https://apps.timwhitlock.info/unicode/inspect/hex/2716
 const RE_IGNORE_SECTION = /[\u2716✖️✖]$/;
 const RE_CATEGORY_ITEM = /:$/;
 const NIL = -1;
@@ -24,10 +24,13 @@ function mapProjectDataToItems(data, sectionsNameById) {
   const { project, items } = data;
 
   const [wellFormattedItems, categoryIds] = formatProjectItems(items, sectionsNameById);
-  const [wellFormattedNoncheckedItems, wellFormattedCheckedItems] = wellFormattedItems.reduce((itemsPair, item) => {
-    itemsPair[ +item.checked ].push(item);
-    return itemsPair;
-  }, [[], []]);
+  const [wellFormattedNoncheckedItems, wellFormattedCheckedItems] = wellFormattedItems.reduce(
+    (itemsPair, item) => {
+      itemsPair[+item.checked].push(item);
+      return itemsPair;
+    },
+    [[], []],
+  );
 
   return [
     {
@@ -35,12 +38,11 @@ function mapProjectDataToItems(data, sectionsNameById) {
       items: {
         done: wellFormattedCheckedItems,
         pending: wellFormattedNoncheckedItems,
-      }
+      },
     },
     categoryIds,
   ];
 }
-
 
 /**
  *
@@ -64,7 +66,8 @@ function formatProjectItems(items, sectionsNameById = { null: ROOT_SECTION }) {
   const categoryIds = [];
   let lastSkippedParentId = NIL;
 
-  for (const item of items) { // Filter and format items
+  for (const item of items) {
+    // Filter and format items
     const {
       id: currId,
       parent_id: currParentId,
@@ -76,14 +79,15 @@ function formatProjectItems(items, sectionsNameById = { null: ROOT_SECTION }) {
       continue;
     }
 
-    if (RE_IGNORE_ITEM.test(currContent)) { // Skip this item and nested ones
+    if (RE_IGNORE_ITEM.test(currContent)) {
+      // Skip this item and nested ones
       lastSkippedParentId = currId;
       continue;
     }
 
     const isCategory = RE_CATEGORY_ITEM.test(currContent);
     const parentSkipped = currParentId == lastSkippedParentId;
-    const skipItem = (parentSkipped || isCategory);
+    const skipItem = parentSkipped || isCategory;
 
     if (!skipItem) {
       selectedTasks.push(formatItem(item));
@@ -101,21 +105,16 @@ function formatProjectItems(items, sectionsNameById = { null: ROOT_SECTION }) {
     }
   }
 
-  return [
-    selectedTasks,
-    categoryIds,
-  ];
+  return [selectedTasks, categoryIds];
 }
 
-
 class Todoist {
-
   constructor(apiToken) {
     this.conn = axios.create({
       baseURL: 'https://api.todoist.com/sync/v8',
       responseType: 'json',
       headers: {
-        'Authorization': `Bearer ${apiToken}`,
+        Authorization: `Bearer ${apiToken}`,
         'X-Request-Id': uuid(),
       },
     });
@@ -143,7 +142,7 @@ class Todoist {
     }
 
     return data.sections;
-  };
+  }
 
   /**
    *
@@ -156,10 +155,10 @@ class Todoist {
     }
 
     const { data } = await this.conn.post('projects/get_data', {
-      project_id: projectId.toString()
+      project_id: projectId.toString(),
     });
     return data;
-  };
+  }
 
   /**
    *
@@ -178,14 +177,13 @@ class Todoist {
     const params = { [paramKey]: paramValue };
     let { data } = await this.conn.post('archive/items', params);
 
-    while (data.has_more) { // To fetch all pages
+    while (data.has_more) {
+      // To fetch all pages
       Object.assign(params, {
-        cursor: data.next_cursor
+        cursor: data.next_cursor,
       });
 
-      const {
-        data: nextData
-      } = await this.conn.post('archive/items', params);
+      const { data: nextData } = await this.conn.post('archive/items', params);
       nextData.items = data.items.concat(nextData.items);
       data.next_cursor = nextData.next_cursor; // this could be `undefined`
       Object.assign(data, nextData);
@@ -193,7 +191,6 @@ class Todoist {
 
     return data;
   }
-
 
   /**
    *
@@ -221,7 +218,6 @@ class Todoist {
   async getArchivedProjectItemsUnderSection(sectionId) {
     return this._getArchivedProjectItems('section_id', sectionId.toString());
   }
-
 
   // /**
   //  * Async generator version of `getArchivedProjectItems` method.
@@ -251,14 +247,17 @@ class Todoist {
     const sections = await this._getSections(projectId);
 
     /** @type {SectionMap} */
-    const sectionsNameById = sections.reduce((sectionsMap, section) => {
-      if (!RE_IGNORE_SECTION.test(section.name.trim())) {
-        sectionsMap[ section.id ] = itemFormatters.formatContent(section.name);
-      }
-      return sectionsMap;
-    }, {
-      null: ROOT_SECTION,
-    });
+    const sectionsNameById = sections.reduce(
+      (sectionsMap, section) => {
+        if (!RE_IGNORE_SECTION.test(section.name.trim())) {
+          sectionsMap[section.id] = itemFormatters.formatContent(section.name);
+        }
+        return sectionsMap;
+      },
+      {
+        null: ROOT_SECTION,
+      },
+    );
 
     return sectionsNameById;
   }
@@ -270,8 +269,9 @@ class Todoist {
    * @returns {Promise<[TodoistPartialResponse, number[]]>}
    */
   getWellFormattedProjectData(projectId, sectionsNameById) {
-    return this._getProjectData(projectId)
-      .then(data => mapProjectDataToItems(data, sectionsNameById));
+    return this._getProjectData(projectId).then(data =>
+      mapProjectDataToItems(data, sectionsNameById),
+    );
   }
 
   /**
@@ -295,30 +295,27 @@ class Todoist {
      */
     const getTasks = whenData => whenData.then(getTasksFromResponseData);
 
-    const {null: _, ...projectSectionsNameById} = sectionsNameById;
+    const { null: _, ...projectSectionsNameById } = sectionsNameById;
     const sectionsIds = Object.keys(projectSectionsNameById).map(Number);
 
-    const whenTasksByProjectId = getTasks( this.getArchivedProjectItemsUnderProject(projectId) );
+    const whenTasksByProjectId = getTasks(this.getArchivedProjectItemsUnderProject(projectId));
     const whenTasksBySectionId = sectionsIds.map(sectionId =>
-      getTasks( this.getArchivedProjectItemsUnderSection(sectionId) )
+      getTasks(this.getArchivedProjectItemsUnderSection(sectionId)),
     );
 
-    const whenAllKindTasks = [
-      whenTasksByProjectId,
-      whenTasksBySectionId,
-    ].flat();
+    const whenAllKindTasks = [whenTasksByProjectId, whenTasksBySectionId].flat();
 
     if (parentIds && parentIds.length) {
       for (const parentId of parentIds) {
-        const whenArchivedProjectTasks = getTasks( this.getArchivedProjectItemsUnderParentItem(parentId) );
+        const whenArchivedProjectTasks = getTasks(
+          this.getArchivedProjectItemsUnderParentItem(parentId),
+        );
         whenAllKindTasks.push(whenArchivedProjectTasks);
       }
     }
 
-    return Promise.all(whenAllKindTasks)
-      .then(fulfilledPromises => fulfilledPromises.flat());
+    return Promise.all(whenAllKindTasks).then(fulfilledPromises => fulfilledPromises.flat());
   }
-
 }
 
 module.exports = Todoist;

@@ -4,7 +4,6 @@ const debug = require('./debug');
 const log = debug('gist');
 
 class Gist {
-
   /**
    *
    * @param {string} ghToken
@@ -54,7 +53,6 @@ class Gist {
       throw err;
     }
   }
-
 }
 
 module.exports = Gist;

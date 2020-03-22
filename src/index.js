@@ -10,7 +10,7 @@ require('dotenv-safe').config({
 const debug = require('./debug');
 const getProjects = require('./projects');
 const Gist = require('./gist');
-const _  = require('./utils');
+const _ = require('./utils');
 const projectsIdByName = require('../projectsIdByName.json');
 
 const log = debug();
@@ -18,13 +18,9 @@ const logError = debug('error');
 
 const projectNames = Object.keys(projectsIdByName);
 
-const {
-  GIST_ID,
-  GH_TOKEN,
-} = process.env;
+const { GIST_ID, GH_TOKEN } = process.env;
 
 const gist = new Gist(GH_TOKEN);
-
 
 /**
  *
@@ -35,11 +31,12 @@ async function createProgressGistFile(projectsMeta) {
   const lines = [];
   const maxPadEnd = _.findLongestString(projectNames).length;
   for (const projectMeta of projectsMeta) {
-    if (projectMeta.numberTasks <= 0) { // To prevent `NaN` outputs
+    if (projectMeta.numberTasks <= 0) {
+      // To prevent `NaN` outputs
       continue;
     }
 
-    const percent = (1 - (projectMeta.numberPendingTasks/projectMeta.numberTasks)) * 100;
+    const percent = (1 - projectMeta.numberPendingTasks / projectMeta.numberTasks) * 100;
     const line = [
       projectMeta.name.padEnd(maxPadEnd),
       _.generateBarChart(percent, 21),
@@ -79,13 +76,18 @@ async function createSummaryGistFile(projectsMeta) {
  */
 async function updateGist(newFilesWithMetadata) {
   /** @type {[ProjectMeta[], GistFile[]]} */
-  const [projectsMeta, newFiles] = newFilesWithMetadata.reduce((acum, curr) => {
-    acum[0].push(curr[0]);
-    acum[1].push(curr[1]);
-    return acum;
-  }, [[], []]);
+  const [projectsMeta, newFiles] = newFilesWithMetadata.reduce(
+    (acum, curr) => {
+      acum[0].push(curr[0]);
+      acum[1].push(curr[1]);
+      return acum;
+    },
+    [[], []],
+  );
 
-  const updatedAtDate = (new Date()).toLocaleString('pt-BR', {timeZone: 'America/Manaus'})
+  const updatedAtDate = new Date().toLocaleString('pt-BR', {
+    timeZone: 'America/Manaus',
+  });
   const newDescription = `📋 Reading List (updated at: ${updatedAtDate} [America/Manaus])`;
 
   const [progressFile, summaryFile] = await Promise.all([
@@ -96,11 +98,7 @@ async function updateGist(newFilesWithMetadata) {
   return gist.updateGistById({
     gistId: GIST_ID,
     newDescription,
-    newFiles: [
-      progressFile,
-      summaryFile,
-      ...newFiles,
-    ],
+    newFiles: [progressFile, summaryFile, ...newFiles],
   });
 }
 

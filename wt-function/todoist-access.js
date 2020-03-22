@@ -9,15 +9,22 @@ module.exports = async function todoistAccess(ctx, cb) {
   const todoist = new Todoist(TODOIST_API_TOKEN);
 
   if (!projectId) {
-    return cb( new Error(`Invalid query parameter 'projectId'.`) );
+    return cb(new Error(`Invalid query parameter 'projectId'.`));
   }
 
   projectId = Number(projectId);
 
   try {
     const sectionsNameById = await todoist.getSectionsGroupedByProjectId(projectId);
-    const [projectData, categoryIds] = await todoist.getWellFormattedProjectData(projectId, sectionsNameById);
-    const archivedItems = await todoist.getProjectArchivedTasks(projectId, sectionsNameById, categoryIds);
+    const [projectData, categoryIds] = await todoist.getWellFormattedProjectData(
+      projectId,
+      sectionsNameById,
+    );
+    const archivedItems = await todoist.getProjectArchivedTasks(
+      projectId,
+      sectionsNameById,
+      categoryIds,
+    );
     // console.log(archivedItems);
 
     const items = {
@@ -30,7 +37,7 @@ module.exports = async function todoistAccess(ctx, cb) {
     const data = {
       sectionsNameById,
       items,
-      total: Object.values(items).reduce((acum, curr) => acum += curr.length, 0),
+      total: Object.values(items).reduce((acum, curr) => (acum += curr.length), 0),
       name: projectData.name,
     };
 

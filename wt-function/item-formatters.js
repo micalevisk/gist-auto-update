@@ -23,8 +23,6 @@ function onlyTruthyValuesOnPojo(obj) {
   return newObj;
 }
 
-
-
 function makeTextContentFormatter() {
   const RE_YT_PLAYLIST = /\s-\sYouTube$/;
   const removeYouTubeKeyword = str => str.replace(RE_YT_PLAYLIST, '');
@@ -37,21 +35,16 @@ function makeTextContentFormatter() {
    * @param {string} text
    * @returns {string}
    */
-  const textContentFormatter = text =>
-    pipe(
-      removeYouTubeKeyword,
-      removeReactKeyword,
-    )(text);
+  const textContentFormatter = text => pipe(removeYouTubeKeyword, removeReactKeyword)(text);
 
   return textContentFormatter;
 }
-
 
 function makeContentFormmatter() {
   const RE_PLAYLIST_CONTENT = /\bplaylist\b/;
   const RE_TAG = /^\{([^}]+)\}\s+(.+)/;
   const RE_HYPERTEXT_1 = /^\[([^\]]+)](?:\s*\((.+)\))\B/; // [This text will be hyperlinked](http://todoist.com/)
-  const RE_HYPERTEXT_2 = /([^\s]+)\s+\((.+)\)/;        //  http://todoist.com/ (This text will be hyperlinked)
+  const RE_HYPERTEXT_2 = /([^\s]+)\s+\((.+)\)/; //  http://todoist.com/ (This text will be hyperlinked)
 
   const formatText = makeTextContentFormatter();
   const formatTag = tag => tag && tag.toLowerCase();
@@ -101,18 +94,16 @@ function makeContentFormmatter() {
   return formatContent;
 }
 
-
 function makeDateFormatter() {
   const RE_DATE = /^(\d{4})-(\d{2})-(\d{2})/;
 
-  const dateFormatter = (dateStr) => {
+  const dateFormatter = dateStr => {
     const [, day, month, year] = dateStr.match(RE_DATE);
     return `${month} ${day}, ${year}`;
   };
 
   return dateFormatter;
 }
-
 
 module.exports = {
   formatDate: makeDateFormatter(),
