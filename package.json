@@ -21,7 +21,7 @@
     "ejs": "^3.0.1",
     "escape-html": "^1.0.3",
     "markdown-it": "^10.0.0",
-    "node-fetch": "^2.2.0"
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "cross-env": "^6.0.3",
