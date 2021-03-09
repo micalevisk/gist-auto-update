@@ -2,7 +2,7 @@ name: Update gist with Todoist items
 on:
   push:
   schedule:
-    - cron: '0 */3 * * *' # Every three hours
+    - cron: '0 0 * * *' # Once a day
 jobs:
   update-gist:
     runs-on: ubuntu-latest
