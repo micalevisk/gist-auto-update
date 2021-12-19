@@ -17,7 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "array.prototype.flat": "^1.2.3",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "axios-logger": "^2.2.1",
     "uuid": "^3.3.3"
   },
